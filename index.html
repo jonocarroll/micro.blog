@@ -24,6 +24,67 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html">Finished reading: Loonshots by Safi Bahcall 📚</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html" class="u-url"><time class="dt-published" datetime="2023-01-08 14:05:31 &#43;1030">Jan 8, 2023</time></a>
+
+		<div class="e-content">
+			 <p>Finished reading: <a href="https://micro.blog/books/9781250185976">Loonshots</a> by Safi Bahcall 📚</p>
+<p>This was recommended by someone at work and this time I&rsquo;m very glad they did. The author carefully details the history of some of the most significant breakthroughs and, as a physicist, isn&rsquo;t shy with the specifics. It was staggering to me at the start of the book how intertwined the &ldquo;big&rdquo; computer tech (and by extension, media; Lucasfilm, Pixar, &hellip;) companies are and the history they share. By the end of the book these connections are much clearer. I hadn&rsquo;t expected quite the history lesson, but the prevalence of persisting English technology over the much older Chinese inventions becomes well-reasoned. Less fun is the contemplation that maybe we don&rsquo;t currently have an equivalent of Bell Labs fostering such speculative exploration without the need to be profitable in the near future. Even the well-funded but negative revenue companies have the plan to be highly profitable, not a plan to make something better. The <a href="https://www.bcorporation.net/en-us/certification">B corporations</a> are a good exception, but they&rsquo;re still not quite &ldquo;loonshot nurseries&rdquo;.</p>
+<p>One of the key learnings for me, as someone who works in a Silicon-valley-adjacent biotech startup (hence the recommendation), was that the attitude of creating a &ldquo;disruptive&rdquo; technology is backwards. Many technologies can be seen as disruptive in hindsight, but they never start out with that attitude. Incremental improvement with the support to try something different certainly leads there, but it&rsquo;s perhaps too large a leap to try to get there sooner. Having the support to try something different that could be better is the first step towards making something incredible, and it certainly won&rsquo;t work every time, but not trying will absolutely lead to not making it.</p>
+<p>Lastly, I don&rsquo;t think it really sunk in while I was working there for nearly five years since I wasn&rsquo;t so read-up on the history, but seeing Genentech mentioned in many of these recent books always makes me do a double-take.</p>
+<p>I thoroughly enjoyed this book and recommend it to anyone interested in how big ideas come about and survive, and why others don&rsquo;t.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
+			<h1><a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html">Implicit or Explicit connection object?</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html" class="u-url"><time class="dt-published" datetime="2023-01-06 15:57:11 &#43;1030">Jan 6, 2023</time></a>
+
+		<div class="e-content">
+			 <p>I&rsquo;m wrapping a (stateless, hit-every-time) REST API and my design was challenged with an alternative opinion - which is great! I get to have a more serious think about design and what might work best. I have an internal function which does the actual talking to the server, e.g. <code>.get_from_API()</code> which needs to know the URL, auth key, and query parameters. I originally designed my package to fetch these from environment variables depending on the API instance (e.g. &lsquo;prod&rsquo; vs &lsquo;dev&rsquo;) and the user (their user-specific key). Individual endpoint wrappers essentially boil down to</p>
+<pre tabindex="0"><code class="language-{r}" data-lang="{r}">get_this &lt;- function(something) {
+    .get_from_API(construct_endpoint(something))
+}
+</code></pre><p>I asked the following question on some of the social sites I use:</p>
+<hr>
+<p>Is there a good reason to use one of these vs the other when wrapping an API?</p>
+<p>A:</p>
+<pre tabindex="0"><code class="language-{r}" data-lang="{r}">get_this(x, ...) # GET
+get_that(x, ...) # GET
+set_this(x, y, ...) # SET
+set_that(x, y, ...) # SET
+</code></pre><p>with something like this within each of these</p>
+<pre tabindex="0"><code class="language-{r}" data-lang="{r}">greedy_con &lt;- .connect(Sys.getenv(implicit_api_vars), ...)
+</code></pre><p>OR</p>
+<p>B:</p>
+<pre tabindex="0"><code class="language-{r}" data-lang="{r}">lazy_con &lt;- .connect(explicit_api_vars, ...)
+this(lazy_con, x, ...) # GET
+that(lazy_con, x, ...) # GET
+this(lazy_con, x) &lt;- y # SET
+that(lazy_con, x) &lt;- y # SET
+</code></pre><p>(Or some third option)?</p>
+<hr>
+<p>The motivation for the second option may have come from python where methods on objects are much more common. Indeed, the canonical python version of this wrapper uses</p>
+<pre tabindex="0"><code class="language-{python}" data-lang="{python}">lazy_con = NameOfAPI(url = {}, key = {})
+
+lazy_con.this()
+lazy_con.that()
+</code></pre><p>In R we have dispatch (e.g. S3) so I <em>could</em> assign a class <code>mycon</code> to <code>lazy_con</code> and methods <code>this.mycon()</code> and <code>that.mycon()</code> but this seems very overengineered. Apparently BioConductor also uses this method syntax but there the standard is S4 dispatch (and typically larger data) so a more explicit object might make more sense.</p>
+<p>Methods on classes seems to be a common frustration for me in python and rust where I&rsquo;m constantly trying to use some function (e.g. <code>abs(x-y)</code>) which is actually a method (<code>(x-y).abs()</code>) but I think I understand <em>why</em> they&rsquo;re built that way.</p>
+<p>So far the responses seem to lean entirely towards hiding the complexity of the connection away. That said, adopting the &lsquo;setter&rsquo; assignment syntax would mean I could do away with the explicit &lsquo;get&rsquo; in the getter function names.</p>
+<p>Do you have an opinion on this? Let me know!</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2023/01/04/finished-reading-neuromancer.html">Finished reading: Neuromancer by William Gibson 📚</a></h1>
 		
 
