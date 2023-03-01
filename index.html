@@ -24,6 +24,80 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html">Finished reading: The Book of Why by Judea Pearl 📚</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-01 18:57:26 &#43;1030">Mar 1, 2023</time></a>
+
+		<div class="e-content">
+			 <p>Finished reading: <a href="https://micro.blog/books/9780241242643">The Book of Why</a> by Judea Pearl 📚</p>
+<p>This was the topic of a book club at work but I&rsquo;m really glad I read it. My scepticism going in was probably typical of someone not all that familiar with causal analysis, believing that we can just throw all the variables at a regression model and get an answer - anything uncorrelated will have a small coefficient and we can dispose of it. This book - while it takes a slightly arrogant/high-and-mighty approach to getting there - carefully explains that this approach works <em>only</em> if there is no dependency between the variables. This is, of course, structured into the regression model assumptions that the covariates are &ldquo;<em>independent</em> and identically distributed&rdquo; (i.i.d.) but who checks assumptions? It goes into depth about the different ways that covariates can be connected; how to route around some of them; and how to figure out which ones to include.</p>
+<p>Some of the examples seemed a bit too strawman for my liking, but I do think the general foundation is pretty solid. It&rsquo;s a bit odd to have what should really be a textbook in causal analysis as a prose-heavy combination of history and wordy examples, but then again I can&rsquo;t say I&rsquo;d have picked up the textbook and read it cover-to-cover like this.</p>
+<p>Overall, I think this should be on any data scientist&rsquo;s reading list at some point. I have a bunch of follow-on reading to get through now, but I&rsquo;m much less likely to make the simple errors in my own statistical analyses (even if I do need to find an analyst who <em>can</em> work it out).</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
+			<h1><a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html">Finished reading: The Self-Taught Computer Scientist by Cory Althoff 📚</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-29 15:38:08 &#43;1030">Jan 29, 2023</time></a>
+
+		<div class="e-content">
+			 <p>Finished reading: <a href="https://micro.blog/books/9781119724339">The Self-Taught Computer Scientist</a> by Cory Althoff 📚</p>
+<p>This is the book I wish I&rsquo;d read before doing <a href="https://adventofcode.com/2022">Advent of Code</a> - a full blog post on that will eventually be on my <a href="https://jcarroll.com.au">main blog</a>; I finished both parts of all 25 exercises in (strictly) base R, and am more than halfway through re-doing all of them in Rust. I was surprised at how much computer science was needed to solve these, but I did enjoy what I learned along the way, so actually reading up on some of it seemed like a good idea.</p>
+<p>This book is the follow-on from <a href="https://micro.blog/books/9781472147097">&lsquo;The Self Taught Programmer&rsquo;</a> (now on my to-read list) and does a really good job of walking through the concepts, partly framed at setting the reader up for being able to solve the typical software engineering interview questions. The code is python, which is approachable enough. There&rsquo;s some minor funkiness of seeing</p>
+<pre tabindex="0"><code class="language-{python}" data-lang="{python}">if condition:
+  return True
+else:
+  return False
+</code></pre><p>rather than just returning <code>condition</code> but otherwise the code is carefully explained. I believe this has the best explanations I&rsquo;ve seen of &lsquo;big O notation&rsquo; for time complexity and how the different variations arise. Similarly, this is the first time I&rsquo;ve understood what a linked list and binary tree are (and how/why someone may want to invert them - I&rsquo;ve only seen the stereotypical interview question).</p>
+<p>As always, the more you learn about programming in one language the more you learn about all the other languages you know, so now I&rsquo;m interested in understanding some of these concepts from an R perspective. I certainly made use of <code>VecDeque</code> and <code>HashMap</code> in my Rust AoC solutions, but in R I was stuck with poorly-performing <code>vector</code> and <code>list</code> objects, which I occasionally improved with an <code>environment</code>. I was very happy to see that R 4.2.2 gains <code>utils::hashtab()</code> (<a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/hashtab.html">link</a>)!.</p>
+<p>Overall I was happy with this book. A great introduction to the concepts, and some useful approaches to interview questions (if you&rsquo;re likely to be asked them).</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
+			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html">Finished reading: Living in Data by Jer Thorp 📚</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:28:23 &#43;1030">Jan 26, 2023</time></a>
+
+		<div class="e-content">
+			 <p>Finished reading: <a href="https://micro.blog/books/9781250849151">Living in Data</a> by Jer Thorp 📚</p>
+<p>(<a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html">previously</a>)</p>
+<p>As a data person, this book spoke to me deeply. As someone who has worked with collected data many times, it offered a fresh insight into understanding nuances of data, where it has come from, how it is <em>never</em> collected without human involvement, and how biases are embedded into every bit and byte.</p>
+<p>Reading this at the same time as <a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html">The Checklist Manifesto</a> was timely as there is a lot of overlap between the ideas in terms of gathering data.</p>
+<p>There were many great examples of &ldquo;practical visualisations&rdquo; and real-world projects involving an intersection of art and (data) science. One of the most interesting was a project involving planting genetically identical trees across a wide area, the idea being that &ldquo;how they grow&rdquo; reflects the local conditions, and as such they are a proxy for data about each area. It&rsquo;s a <a href="https://www.deeproot.com/blog/blog-entries/onetrees-the-forgotten-tree-art-project/">somewhat lost project</a> it seems, but interesting nonetheless.</p>
+<p>My very minor nitpick about this one was the very common American-ism of assuming everyone is in the Northern Hemisphere, and as such &ldquo;winter&rdquo; and &ldquo;spring&rdquo; refer to unique times of the year. It reminded me of the bias inherent in the construction of the &lsquo;north is up&rsquo; mental model of the world</p>
+<!-- raw HTML omitted -->
+<p>(you do have to choose some direction, and any is as good as any other, but it&rsquo;s a choice).</p>
+<p>I loved reading this book, and I will be strongly recommending it to everyone who works with data. I am very happy that I picked up this one - sometimes browsing the shelves randomly works.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
+			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html">Finished reading: The Checklist Manifesto by Atul Gawande 📚</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:06:38 &#43;1030">Jan 26, 2023</time></a>
+
+		<div class="e-content">
+			 <p>Finished reading: <a href="https://micro.blog/books/9781846683145">The Checklist Manifesto</a> by Atul Gawande 📚</p>
+<p>I honestly didn&rsquo;t know what I was getting when I placed a library hold on this book - a recommendation from somewhere, but I assumed it was about something like how to write good checklists or manage priorities. This is not that book. This is a wild ride through the ways that some checklists have been used by the author and others throughout history. Not just any checklists, mind you - it&rsquo;s a tour of how a very important checklist was designed, refined, and implemented. The side-stories are often confronting, impactful, and very entertainingly spun together. I clicked &lsquo;confirm purchase&rsquo; on my own copy of this book before I had finished reading it. I suspect I&rsquo;ll come back to this one again.</p>
+<p>Highly recommended to anyone and everyone, but especially anyone who wants to ensure that things actually get done.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-our.html">Finished reading: Our Data, Ourselves by Jacqueline D. Lipton 📚</a></h1>
 		
 
