@@ -24,6 +24,39 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html">FizzBuzz without an if</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html" class="u-url"><time class="dt-published" datetime="2023-05-12 16:11:17 &#43;0930">May 12, 2023</time></a>
+
+		<div class="e-content">
+			 <p>Apparently using an <code>if</code> to solve <a href="https://en.wikipedia.org/wiki/Fizz_buzz">FizzBuzz</a> is a sign that you&rsquo;re <a href="https://youtu.be/GfNBZ7awHGo?t=545">not a great programmer</a>&hellip; Well, that&rsquo;s how I would have done it :-(</p>
+<p>I wanted to see what the <code>map</code> alternative looked like, and I found <a href="https://builtin.com/software-engineering-perspectives/fizzbuzz-python#:~:text=Programming%20with%20Mosh-,4.%20LAMBDA,-Another%20method%20we">this python example</a></p>
+<pre tabindex="0"><code>print(*map(lambda i: 'Fizz'*(not i%3)+'Buzz'*(not i%5) or i, range(1,101)),sep='\n')
+</code></pre><p>What&rsquo;s interesting to me is that there&rsquo;s an <code>or</code> in there - if neither of the modulo operations match, then the resulting string is empty, and that can be used in an <code>or</code> (failing the left-hand side). Whoa! That doesn&rsquo;t work in R because characters can&rsquo;t be used in logical operations</p>
+<pre tabindex="0"><code>&quot;&quot; | 2
+Error in &quot;&quot; | 2 : 
+  operations are possible only for numeric, logical or complex types
+</code></pre><p>The rest I can more or less reproduce in R, using <code>strrep</code> in place of the infix <code>*</code> used for &lsquo;repeat string&rsquo;</p>
+<pre tabindex="0"><code>sapply(1:20, 
+       \(x) paste0(
+         strrep(&quot;Fizz&quot;, x %% 3 == 0), 
+         strrep(&quot;Buzz&quot;, x %% 5 == 0), 
+         strrep(x, x %% 3 != 0 &amp;&amp; x %% 5 != 0)
+       )
+)
+ [1] &quot;1&quot;        &quot;2&quot;        &quot;Fizz&quot;     &quot;4&quot;        &quot;Buzz&quot;     &quot;Fizz&quot;    
+ [7] &quot;7&quot;        &quot;8&quot;        &quot;Fizz&quot;     &quot;Buzz&quot;     &quot;11&quot;       &quot;Fizz&quot;    
+[13] &quot;13&quot;       &quot;14&quot;       &quot;FizzBuzz&quot; &quot;16&quot;       &quot;17&quot;       &quot;Fizz&quot;    
+[19] &quot;19&quot;       &quot;Buzz&quot;    
+</code></pre><p>This also requires the additional comparison for when the number is a divisor of neither number, so kudos to python for working nicer in that case.</p>
+<p>Is there an even better way to solve this without an <code>if</code>?</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2023/04/12/finished-reading-bullshit.html">Finished reading: Bullshit Jobs by David Graeber 📚</a></h1>
 		
 
