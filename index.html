@@ -24,6 +24,203 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html">Filtering vectors</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html" class="u-url"><time class="dt-published" datetime="2023-07-03 13:05:36 &#43;0930">Jul 3, 2023</time></a>
+
+		<div class="e-content">
+			 <p>I saw a YouTube short demonstrating how to use <code>filter()</code> in Python along the lines of</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">nums<span style="color:#f92672">=</span>range(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">30</span>)
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_prime</span>(num):
+  <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">2</span>,num):
+    <span style="color:#66d9ef">if</span> (num<span style="color:#f92672">%</span>x) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+    
+  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+
+  
+primes<span style="color:#f92672">=</span>list(filter(is_prime, nums))
+print(primes)
+<span style="color:#75715e"># [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29]</span>
+</code></pre></div><p>and as always, I like to think about how I&rsquo;d do this in other languages (e.g. R).</p>
+<p>The (deliberately brute-force) <code>is_prime()</code> function translates easily enough</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">is_prime <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(x) {
+  <span style="color:#a6e22e">for </span>(i in <span style="color:#ae81ff">2</span><span style="color:#f92672">:</span>(x<span style="color:#ae81ff">-1</span>)) {
+    <span style="color:#a6e22e">if </span>(x <span style="color:#f92672">%%</span> i <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">FALSE</span>)
+  }
+  <span style="color:#66d9ef">TRUE</span>
+}
+</code></pre></div><p>and the most common way to run this over a vector of inputs is with something like <code>sapply()</code> returning a vector of logicals that can be used for square-bracket subsetting</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">x <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">30</span>
+primes <span style="color:#f92672">&lt;-</span> x<span style="color:#a6e22e">[sapply</span>(x, is_prime)]
+primes
+<span style="color:#75715e"># [1]  3  5  7 11 13 17 19 23 29</span>
+</code></pre></div><p>We can get rid of the need for <code>sapply()</code> by vectorising the function which is done easily with <code>Vectorize()</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">is_prime_v <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">Vectorize</span>(is_prime)
+primes <span style="color:#f92672">&lt;-</span> x<span style="color:#a6e22e">[is_prime_v</span>(x)]
+primes
+<span style="color:#75715e"># [1]  3  5  7 11 13 17 19 23 29</span>
+</code></pre></div><p>It&rsquo;s usually at this point that I feel bad about having to write <code>x</code> twice and lament that while {dplyr} is great for <code>data.frame</code>s, we don&rsquo;t have something equivalent for filtering of vectors so easily&hellip; except we do (as I usually end up remembering). <code>Filter()</code> is a base function that works on vectors and is the equivalent of what we saw in Python (per the docs, <a href="https://hoogle.haskell.org/?hoogle=filter">&ldquo;Filter corresponds to filter in Haskell&rdquo;</a>)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">primes <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">Filter</span>(is_prime, x)
+primes
+<span style="color:#75715e"># [1]  3  5  7 11 13 17 19 23 29</span>
+</code></pre></div><p>I need to remember to use that (as well as the rest of the gold-mine in the &lsquo;funprog&rsquo; toolbox like <code>Map</code> and <code>Reduce</code>) more often.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
+			<h1><a href="https://jcarroll.xyz/2023/06/14/around-the-web.html">Around the web 2023W24</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/06/14/around-the-web.html" class="u-url"><time class="dt-published" datetime="2023-06-16 13:20:20 &#43;0930">Jun 16, 2023</time></a>
+
+		<div class="e-content">
+			 <p>I think I&rsquo;m happy with my <a href="https://feedrabbit.com/">RSS-to-email</a> setup now but I feel like I&rsquo;m only passively reading things and can do better. I&rsquo;m going to try summarising (on this micro blog) the interesting posts I see (RSS feeds, newsletters, social feeds, general web finds) as a way to share some links, to be able to find them again later, and to reinforce what I&rsquo;m learning. This is informal, largely unstructured, largely unedited, and possibly only interesting to me, but if you don&rsquo;t like it then don&rsquo;t read it. Feel free to comment (here or elsewhere) and start a conversation on any of the topics (or anything).</p>
+<p>I think I&rsquo;ll aim for a weekly post with all the things I read that week. That way I can add to them as I revisit each day. This post already ended up longer than I expected, but I was able to piece it together over many updates via a web text input box rather than re-building my static website.</p>
+<h2 id="this-is-valid-python-syntax">This is valid Python syntax</h2>
+<p><a href="https://www.bitecode.dev/p/this-is-valid-python-syntax">https://www.bitecode.dev/p/this-is-valid-python-syntax</a></p>
+<p>Source: HN toot (now substack subscribed)</p>
+<p>I <em>really</em> like this post for the fact that it teaches a pile of interesting (python) syntax and invites the reader to see if they can unpack all the pieces. Fun little puzzles like <a href="https://codegolf.stackexchange.com/">code-golf</a> are great for this.</p>
+<p>One thing that really struck me was python&rsquo;s ability to use a variable number of arguments in a function</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">a_lot</span>(<span style="color:#f92672">*</span>of_stuff): <span style="color:#75715e"># accept 0, 1 or more params</span>
+<span style="color:#f92672">...</span>     print(of_stuff)
+<span style="color:#f92672">...</span>
+</code></pre></div><p>which we <em>can</em> do in R with <code>...</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">a_lot <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(<span style="color:#66d9ef">...</span>) {
+  <span style="color:#a6e22e">print</span>(<span style="color:#a6e22e">list</span>(<span style="color:#66d9ef">...</span>))
+}
+<span style="color:#a6e22e">a_lot</span>(a <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>, b <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>)
+<span style="color:#f92672">$</span>a
+[1] <span style="color:#ae81ff">1</span>
+
+<span style="color:#f92672">$</span>b
+[1] <span style="color:#ae81ff">2</span>
+</code></pre></div><p>but python can also unpack (&ldquo;splat&rdquo;?) the arguments</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">square_area</span>(x1, y1, x2, y2):
+<span style="color:#f92672">...</span>     side_length <span style="color:#f92672">=</span> abs(x2 <span style="color:#f92672">-</span> x1)
+<span style="color:#f92672">...</span>     area <span style="color:#f92672">=</span> side_length <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>
+<span style="color:#f92672">...</span>     <span style="color:#66d9ef">return</span> area
+<span style="color:#f92672">...</span> coords <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">3</span>]
+<span style="color:#f92672">&gt;&gt;&gt;</span> square_area(coords[<span style="color:#ae81ff">0</span>], coords[<span style="color:#ae81ff">1</span>], coords[<span style="color:#ae81ff">2</span>], coords[<span style="color:#ae81ff">3</span>])
+<span style="color:#ae81ff">9</span>
+<span style="color:#f92672">&gt;&gt;&gt;</span> square_area(<span style="color:#f92672">*</span>coords)
+<span style="color:#ae81ff">9</span>
+</code></pre></div><p>which R can&rsquo;t do (well, <code>do.call(what, args)</code> does that, but not as cleanly).</p>
+<p>I bet some interesting results could be made with R syntax - there&rsquo;s an idea for a post.</p>
+<h2 id="get-the-most-out-of-python-dicts">Get the most out of Python dicts</h2>
+<p><a href="https://www.bitecode.dev/p/get-the-most-out-of-python-dict">https://www.bitecode.dev/p/get-the-most-out-of-python-dict</a></p>
+<p>Source: Substack subscription</p>
+<p><code>dict</code> is a structure in python that I suppose the R equivalent of is a named vector or a <code>list</code>, but there&rsquo;s some hashset-like quality to them (the keys are unique) so that&rsquo;s not exact at all. There&rsquo;s a lot of semantics specific to <code>dict</code> that I haven&rsquo;t appreciated yet, so this was a nice little tour.</p>
+<h2 id="how-to-write-conditional-statements-in-r-four-methods">How to Write Conditional Statements in R: Four Methods</h2>
+<p><a href="https://towardsdatascience.com/how-to-write-conditional-statements-in-r-four-methods-f9bedbae0683">https://towardsdatascience.com/how-to-write-conditional-statements-in-r-four-methods-f9bedbae0683</a></p>
+<p>Source: Mastodon boost</p>
+<p>This is a post for R beginners, but I&rsquo;m wary that the <code>ifelse()</code> vector example could be misleading since it will error if the logic is applied back to the <code>if()</code> scenario (length &gt; 1). The post isn&rsquo;t wrong per-se, but it would be worth pointing out. I&rsquo;ve also hit bugs in the past because the <em>shape</em> of the condition needs to match the shape of the result</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ifelse</span>(<span style="color:#66d9ef">TRUE</span>, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">2</span>)
+[1] <span style="color:#ae81ff">1</span>
+</code></pre></div><p>The author also says</p>
+<blockquote>
+<p>This makes ifelse a clean way of evaluating lots of simple conditions without needing slow, messy loops.</p>
+</blockquote>
+<p>and it should be noted that for-loops aren&rsquo;t slow; your code is slow <a href="https://youtu.be/TdbweYvwnss">https://youtu.be/TdbweYvwnss</a></p>
+<h2 id="emulated-build-and-test-of-bioconductor-packages-for-linux-arm64">Emulated build and test of Bioconductor packages for Linux ARM64</h2>
+<p><a href="https://bioconductor.github.io/biocblog/posts/2023-06-09-debug-linux-arm64-on-docker/">https://bioconductor.github.io/biocblog/posts/2023-06-09-debug-linux-arm64-on-docker/</a></p>
+<p>Source: Mastodon follow</p>
+<p>along with rocker/rstudio arm64 builds <a href="https://hub.docker.com/r/rocker/rstudio/tags">https://hub.docker.com/r/rocker/rstudio/tags</a></p>
+<p>I&rsquo;ve been waiting for this for a while! I got an M1 mac when I started my current job over a year ago and while I can deploy docker images in a cloud solution, I couldn&rsquo;t test them locally. Time to build all the things!</p>
+<h2 id="feeling-rusty-counting-characters">Feeling rusty: counting characters</h2>
+<p><a href="https://josiahparry.com/posts/2023-04-13-counting-chars/">https://josiahparry.com/posts/2023-04-13-counting-chars/</a></p>
+<p>Source: the Julia post below</p>
+<p>Just when you think R is sort of okay at performance - not terrible, but by no means the fastest - Rust goes and shows you that you&rsquo;re wasting your time even trying to keep up and has already gone to lunch after completing all its tasks. This was a great intro to &lsquo;Rust as an RCpp replacement&rsquo; via {rextendr} (a fuller intro from the same author is <a href="https://youtu.be/tRm-Qq2_Ap0">https://youtu.be/tRm-Qq2_Ap0</a>).</p>
+<h2 id="string-matching-in-julia">String Matching in Julia</h2>
+<p><a href="https://www.ericekholm.com/posts/string-match-jl/">https://www.ericekholm.com/posts/string-match-jl/</a></p>
+<p>Source: RT</p>
+<p>This reminds me what I like so much about Julia syntax. Those function definitions are just <em>so</em> clean!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia"><span style="color:#66d9ef">function</span> compare_strings(x<span style="color:#f92672">::</span><span style="color:#66d9ef">String</span>, y<span style="color:#f92672">::</span><span style="color:#66d9ef">String</span>)
+    s <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">∈</span> eachindex(x)
+        x[i] <span style="color:#f92672">!=</span> y[i] <span style="color:#f92672">?</span> <span style="color:#66d9ef">break</span> <span style="color:#f92672">:</span> s <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">return</span> s
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>And being able to add more definitions just by <em>writing them out</em> is so compact (a full post on that coming soon).</p>
+<p>As for performance, that looks hard to beat. I plan to run the R, Rust, and Julia functions on one machine and see how they compare, but I&rsquo;m not going to let it get in the way of writing this.</p>
+<h2 id="whats-so-special-about-arrays">What’s so special about arrays?</h2>
+<p><a href="https://josiahparry.com/posts/2023-06-11-matrix-bug.html">https://josiahparry.com/posts/2023-06-11-matrix-bug.html</a></p>
+<p>Source: r-contributors slack</p>
+<p>I commented in the slack thread but my take on this is that <code>matrix</code> is pretty much a vector with a <code>dim</code> attribute, so I&rsquo;m not so surprised that <code>unclass()</code> doesn&rsquo;t really &ldquo;un-class&rdquo; it. <code>?class</code> seems to refer to this as an &ldquo;implicit class&rdquo;.</p>
+<h2 id="effective-spaced-repetition">Effective Spaced Repetition</h2>
+<p><a href="https://borretti.me/article/effective-spaced-repetition">https://borretti.me/article/effective-spaced-repetition</a></p>
+<p>Source: originally via <a href="https://borretti.me/article/depth-first-procrastination">https://borretti.me/article/depth-first-procrastination</a> via RSS Feed</p>
+<p>This is a longer read, but I&rsquo;m on board with the principle.</p>
+<h2 id="research-sum-types">(Research) Sum Types</h2>
+<p>Trigger: <a href="https://corecursive.com/048-jared-forsyth-the-reason-for-types/#sum-types-in-reasonml">Corecursive podcast</a></p>
+<p>I&rsquo;m digging through some older episodes for a once-a-week rare commute somewhere and this term caught my ear so I decided to look into it a bit and it turns out to be super interesting! I haven&rsquo;t dug through all of these, but this serves as a sort of bookmark for me to come back to.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Algebraic_data_type">https://en.wikipedia.org/wiki/Algebraic_data_type</a></li>
+<li><a href="https://www.reddit.com/r/ProgrammingLanguages/comments/10jewgp/could_you_explain_why_sum_types_are_so_good/">https://www.reddit.com/r/ProgrammingLanguages/comments/10jewgp/could_you_explain_why_sum_types_are_so_good/</a></li>
+<li><a href="https://shreevatsa.wordpress.com/2015/01/31/boolean-blindness/">https://shreevatsa.wordpress.com/2015/01/31/boolean-blindness/</a></li>
+<li><a href="https://serokell.io/blog/algebraic-data-types-in-haskell">https://serokell.io/blog/algebraic-data-types-in-haskell</a></li>
+<li><a href="https://jrsinclair.com/articles/2019/algebraic-data-types-what-i-wish-someone-had-explained-about-functional-programming/">https://jrsinclair.com/articles/2019/algebraic-data-types-what-i-wish-someone-had-explained-about-functional-programming/</a></li>
+<li><a href="https://docs.rs/sum_type/latest/sum_type/">https://docs.rs/sum_type/latest/sum_type/</a></li>
+<li><a href="https://www.youtube.com/watch?v=LafOj_HrxRQ">https://www.youtube.com/watch?v=LafOj_HrxRQ</a> aaaand now I&rsquo;m glad I was keeping track of all of these; this is a very timely video on Rust enums that covers some of this topic. Found via <a href="https://this-week-in-rust.org/blog/2023/06/14/this-week-in-rust-499/">This Week in Rust</a>.</li>
+</ul>
+<h2 id="is-that-a-compiler-bug">Is That a Compiler Bug?</h2>
+<p><a href="https://blog.regehr.org/archives/26">https://blog.regehr.org/archives/26</a></p>
+<p>An older post (circa 2010) that I don&rsquo;t recall how I came across. Interesting, though not something I&rsquo;m likely to encounter myself anytime soon.</p>
+<h2 id="writing-r-in-vscode-working-with-multiple-r-sessions">Writing R in VSCode: Working with multiple R sessions</h2>
+<p><a href="https://renkun.me/2020/04/14/writing-r-in-vscode-working-with-multiple-r-sessions/">https://renkun.me/2020/04/14/writing-r-in-vscode-working-with-multiple-r-sessions/</a></p>
+<p>Source: rOpenSci slack</p>
+<p>I&rsquo;ve been starting to use <code>tmux</code> in terminals lately and am really enjoying it, so when a question came up about connecting a VSCode session to it (which could be remotely connected) my interest was piqued. The linked post might be a solution to that, though I&rsquo;m yet to try it myself.</p>
+<h2 id="list-one-task-do-it-cross-it-out">List one task, do it, cross it out</h2>
+<p><a href="https://www.oliverburkeman.com/onething">https://www.oliverburkeman.com/onething</a></p>
+<p>Source: can&rsquo;t recall&hellip; HN? This echos a lot of what the &lsquo;minimalist&rsquo; folks are saying about organising and cleaning; trying to decide which of the dozen semi-important things you need to work on often leads to doing none of them, but by choosing just one you know exactly what you need to do.</p>
+<h2 id="finish-your-projects">Finish your projects</h2>
+<p><a href="https://github.com/readme/guides/finish-your-projects">https://github.com/readme/guides/finish-your-projects</a></p>
+<p>Source: TLDR newsletter</p>
+<p>Similar to the above article in terms of message; pick something and do it.</p>
+<h2 id="iterating-on-testing-in-rust">Iterating on Testing in Rust</h2>
+<p><a href="https://epage.github.io/blog/2023/06/iterating-on-test/">https://epage.github.io/blog/2023/06/iterating-on-test/</a></p>
+<p>Source: HN</p>
+<p>Good overview of how tests work in Rust.</p>
+<h2 id="row-relational-operations-with-slice">Row relational operations with slice()</h2>
+<p><a href="https://yjunechoe.github.io/posts/2023-06-11-row-relational-operations/">https://yjunechoe.github.io/posts/2023-06-11-row-relational-operations/</a></p>
+<p>Source: RWeekly</p>
+<p>Winners: <code>slice()</code> as a <code>filter()</code> being able use row indices with <code>cond + 1</code>; <code>outer()</code> to get non-recycling addition. A very in-depth article that goes through lots of uses of <code>slice()</code>.</p>
+<h2 id="on-updating-a-chat-assistant-app-for-the-rstudio-ide">On updating a chat assistant app for the RStudio IDE</h2>
+<ul>
+<li><a href="https://samuelenrique.com/posts/2023-06-02-updating-gptstudio/">https://samuelenrique.com/posts/2023-06-02-updating-gptstudio/</a></li>
+</ul>
+<p>Source: RWeekly</p>
+<p>The auto-updating streaming output is very cool! I wonder if there&rsquo;s an open streaming resource I could use to try this?</p>
+<p>This also demonstrates adding &lsquo;copy&rsquo; button to code blocks which I don&rsquo;t have on my blog - perhaps I could? They used</p>
+<pre tabindex="0"><code class="language- " data-lang=" ">$('pre').each(function() {
+  const $codeChunk = $(this);
+  const $copyButton = $('&lt;button&gt;').text('Copy');
+  $codeChunk.prepend($copyButton);
+
+  $copyButton.on('click', function() {
+    const codeText = $codeChunk.text();
+    navigator.clipboard.writeText(codeText);
+  });
+});
+</code></pre><h2 id="a-terminal-case-of-linux">A terminal case of Linux</h2>
+<p><a href="https://fasterthanli.me/articles/a-terminal-case-of-linux">https://fasterthanli.me/articles/a-terminal-case-of-linux</a></p>
+<p>Source: ? (Mastodon?)</p>
+<p>I don&rsquo;t recall where or why I found this 2021 article but as usual, Amos goes reeeeally deep into some Rust code (and libc / Linux in this case). I got hooked on these posts when (re-)doing AoC 2022 and for <a href="https://fasterthanli.me/series/advent-of-code-2022/part-1">day 1</a> Amos went mile-deep (25mins read) on Rust in general when the problem to be solved was &ldquo;straightforward&rdquo;.</p>
+<h2 id="friction-baby">Friction, Baby</h2>
+<p><a href="https://tedium.co/2023/06/10/productivity-friction-theory/">https://tedium.co/2023/06/10/productivity-friction-theory/</a></p>
+<p>Source: HN</p>
+<p>This makes a lot of sense to me and made me consider a lot of the patterns (anti-, dark-, or otherwise) I see in my media consumption. The goal of this micro blog is to have as little friction as possible when publishing some markdown text. Sometimes, some interactions could use a bit more friction.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html">FizzBuzz without an if</a></h1>
 		
 
