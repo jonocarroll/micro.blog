@@ -24,6 +24,124 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html">Breaking down squared digits in (Dyalog) APL</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html" class="u-url"><time class="dt-published" datetime="2023-11-16 10:17:56 &#43;1030">Nov 16, 2023</time></a>
+
+		<div class="e-content">
+			 <p>I love small challenges as a way to learn a language. I spotted <a href="https://mastodon.social/@krz/111415569841445388">this one</a> in the #rstats hashtag on Mastodon</p>
+<blockquote>
+<p>&ldquo;square each digit of an integer (return integer), eg 9113 becomes 81119&rdquo;</p>
+</blockquote>
+<p>and I just <em>had</em> to try it in APL.</p>
+<p>First, extract each of the digits using format</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#66d9ef">{</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵<span style="color:#66d9ef">}</span><span style="color:#ae81ff">9113</span>
+<span style="color:#ae81ff">9</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">3</span>
+</code></pre></div><p>then square each digit, using the commute operator to make <code>2*x</code> into <code>x*2</code> (<code>*</code> is power)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#66d9ef">{</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵<span style="color:#66d9ef">}</span><span style="color:#ae81ff">9113</span>
+<span style="color:#ae81ff">81</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">9</span>
+</code></pre></div><p>The  next bit took me a bit of trying, but I got there (please do let me know if there&rsquo;s an easier way)&hellip; extract each digit as a character</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#66d9ef">{</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵<span style="color:#66d9ef">}</span><span style="color:#ae81ff">9113</span>
+<span style="color:#960050;background-color:#1e0010">┌──┬─┬─┬─┐</span>
+<span style="color:#960050;background-color:#1e0010">│</span><span style="color:#ae81ff">81</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">│</span><span style="color:#ae81ff">9</span><span style="color:#960050;background-color:#1e0010">│</span>
+<span style="color:#960050;background-color:#1e0010">└──┴─┴─┴─┘</span>
+</code></pre></div><p>then catenate-reduce</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#66d9ef">{</span><span style="color:#f92672">,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵<span style="color:#66d9ef">}</span><span style="color:#ae81ff">9113</span>
+<span style="color:#960050;background-color:#1e0010">┌─────┐</span>
+<span style="color:#960050;background-color:#1e0010">│</span><span style="color:#ae81ff">81119</span><span style="color:#960050;background-color:#1e0010">│</span>
+<span style="color:#960050;background-color:#1e0010">└─────┘</span>
+</code></pre></div><p>and finally enlist down to a scalar</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#66d9ef">{</span><span style="color:#f92672">∊,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵)<span style="color:#66d9ef">}</span><span style="color:#ae81ff">9113</span>
+<span style="color:#ae81ff">81119</span>
+</code></pre></div><p>Wrapping it into a named defun, it&rsquo;s not all that bad</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      squaredigits<span style="color:#66d9ef">←</span><span style="color:#66d9ef">{</span><span style="color:#f92672">∊,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵)<span style="color:#66d9ef">}</span>
+      squaredigits <span style="color:#ae81ff">9113</span>
+<span style="color:#ae81ff">81119</span>
+</code></pre></div><p>Is it as nice as the Julia solution?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia">parse(<span style="color:#66d9ef">Int</span>, join(reverse(digits(num))<span style="color:#f92672">.^</span><span style="color:#ae81ff">2</span>))
+</code></pre></div><p>or, as mentioned in a reply</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia"><span style="color:#66d9ef">using</span> Chain
+[<span style="color:#a6e22e">@chain</span>](https<span style="color:#f92672">://</span>micro<span style="color:#f92672">.</span>blog<span style="color:#f92672">/</span>chain) num digits reverse _<span style="color:#f92672">.^</span><span style="color:#ae81ff">2</span> join parse(<span style="color:#66d9ef">Int</span>, _)
+</code></pre></div><p>No - I think in this case Julia does a much nicer job; easier to reason and interpret but that comes from having nice wrappers for things like <code>digits</code> (which returns them in reverse order, requiring the <code>reverse</code>). I could absolutely do that in APL, I&rsquo;ve just been trying to do it entirely with primitives, but nice wrappers are nice&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">digits<span style="color:#66d9ef">←</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>
+      digits <span style="color:#ae81ff">9113</span>
+<span style="color:#ae81ff">9</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">3</span>
+</code></pre></div><p>same for <code>join</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">join<span style="color:#66d9ef">←</span><span style="color:#f92672">∊</span>(<span style="color:#f92672">,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>)
+      join <span style="color:#ae81ff">81</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">9</span>
+<span style="color:#ae81ff">81119</span>
+</code></pre></div><p>and heck, square</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">square<span style="color:#66d9ef">←</span><span style="color:#66d9ef">{</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span>⍵<span style="color:#66d9ef">}</span>
+      square <span style="color:#ae81ff">9</span>
+<span style="color:#ae81ff">81</span>
+</code></pre></div><p>so then the APL solution, via composing these three functions, becomes simply</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">squaredigits<span style="color:#66d9ef">←</span>join<span style="color:#a6e22e">∘</span>square<span style="color:#a6e22e">∘</span>digits
+      squaredigits <span style="color:#ae81ff">9113</span>
+<span style="color:#ae81ff">81119</span>
+</code></pre></div><p>Now <em>THAT&rsquo;s</em> readable!</p>
+<p>Want to see how it works? APL prints out the AST for a function like this</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">squaredigits
+     <span style="color:#a6e22e">∘</span>      
+    <span style="color:#960050;background-color:#1e0010">┌┴┐</span>     
+    <span style="color:#a6e22e">∘</span> <span style="color:#a6e22e">¨</span>     
+  <span style="color:#960050;background-color:#1e0010">┌─┴─┐</span>     
+<span style="color:#960050;background-color:#1e0010">┌─┴─┐</span> <span style="color:#66d9ef">{</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span>⍵<span style="color:#66d9ef">}</span>
+<span style="color:#f92672">∊</span> <span style="color:#960050;background-color:#1e0010">┌─┴─┐</span>     
+  <span style="color:#a6e22e">/</span>   <span style="color:#a6e22e">¨</span>     
+<span style="color:#960050;background-color:#1e0010">┌─┘</span> <span style="color:#960050;background-color:#1e0010">┌─┘</span>     
+<span style="color:#f92672">,</span>     
+</code></pre></div><p>I&rsquo;m not nearly done loving what APL can do.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
+			<h1><a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html">Breaking down fizzbuzz in (Dyalog) APL</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html" class="u-url"><time class="dt-published" datetime="2023-11-10 22:19:05 &#43;1030">Nov 10, 2023</time></a>
+
+		<div class="e-content">
+			 <p>The one-liner solution: <code>{∊(3↑(0=3 5|⍵)∪1)/'Fizz' 'Buzz' ⍵}¨⍳20</code></p>
+<p>The explanation:</p>
+<p>For each value in <code>[1, 2, ..., 20]</code>, find the boolean mask of &ldquo;is this divisible by 3 or 5?&rdquo; (vectorized).</p>
+<p><code>{0=3 5|⍵}¨⍳20</code></p>
+<pre tabindex="0"><code>┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+│0 0│0 0│1 0│0 0│0 1│1 0│0 0│0 0│1 0│0 1│0 0│1 0│0 0│0 0│1 1│0 0│0 0│1 0│0 0│0 1│
+└───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+</code></pre><p>Union this with the value 1; if 1 doesn&rsquo;t already appear, add it. This is now a mask for whether the result
+should be &ldquo;fizz&rdquo; <code>(1 0)</code>, &ldquo;buzz&rdquo; <code>(0 1)</code>, &ldquo;fizzbuzz&rdquo; <code>(1 1)</code>, or the number itself <code>(0 0 1)</code>.</p>
+<p><code>{(0=3 5|⍵)∪1}¨⍳20</code></p>
+<pre tabindex="0"><code>┌─────┬─────┬───┬─────┬───┬───┬─────┬─────┬───┬───┬─────┬───┬─────┬─────┬───┬─────┬─────┬───┬─────┬───┐
+│0 0 1│0 0 1│1 0│0 0 1│0 1│1 0│0 0 1│0 0 1│1 0│0 1│0 0 1│1 0│0 0 1│0 0 1│1 1│0 0 1│0 0 1│1 0│0 0 1│0 1│
+└─────┴─────┴───┴─────┴───┴───┴─────┴─────┴───┴───┴─────┴───┴─────┴─────┴───┴─────┴─────┴───┴─────┴───┘
+</code></pre><p>Take 3 elements; if there are only 2, extend it to 3 (adding a 0). The combinations are then
+&ldquo;fizz&rdquo; <code>(1 0 0)</code>, &ldquo;buzz&rdquo; <code>(0 1 0)</code>, &ldquo;fizzbuzz&rdquo; <code>(1 1 0)</code>, or the number itself <code>(0 0 1)</code>.</p>
+<p><code>{3↑(0=3 5|⍵)∪1}¨⍳20</code></p>
+<pre tabindex="0"><code>┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+│0 0 1│0 0 1│1 0 0│0 0 1│0 1 0│1 0 0│0 0 1│0 0 1│1 0 0│0 1 0│0 0 1│1 0 0│0 0 1│0 0 1│1 1 0│0 0 1│0 0 1│1 0 0│0 0 1│0 1 0│
+└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+</code></pre><p>Filter the vector <code>'Fizz' 'Buzz' ⍵</code> based on this boolean mask.</p>
+<p><code>{(3↑(0=3 5|⍵)∪1)/'Fizz' 'Buzz'⍵}¨⍳20</code></p>
+<pre tabindex="0"><code>┌─┬─┬──────┬─┬──────┬──────┬─┬─┬──────┬──────┬──┬──────┬──┬──┬───────────┬──┬──┬──────┬──┬──────┐
+│1│2│┌────┐│4│┌────┐│┌────┐│7│8│┌────┐│┌────┐│11│┌────┐│13│14│┌────┬────┐│16│17│┌────┐│19│┌────┐│
+│ │ ││Fizz││ ││Buzz│││Fizz││ │ ││Fizz│││Buzz││  ││Fizz││  │  ││Fizz│Buzz││  │  ││Fizz││  ││Buzz││
+│ │ │└────┘│ │└────┘│└────┘│ │ │└────┘│└────┘│  │└────┘│  │  │└────┴────┘│  │  │└────┘│  │└────┘│
+└─┴─┴──────┴─┴──────┴──────┴─┴─┴──────┴──────┴──┴──────┴──┴──┴───────────┴──┴──┴──────┴──┴──────┘
+</code></pre><p>and finally, enlist (flatten) the vector.</p>
+<p><code>{∊(3↑(0=3 5|⍵)∪1)/'Fizz' 'Buzz'⍵}¨⍳20</code></p>
+<pre tabindex="0"><code>┌─┬─┬────┬─┬────┬────┬─┬─┬────┬────┬──┬────┬──┬──┬────────┬──┬──┬────┬──┬────┐
+│1│2│Fizz│4│Buzz│Fizz│7│8│Fizz│Buzz│11│Fizz│13│14│FizzBuzz│16│17│Fizz│19│Buzz│
+└─┴─┴────┴─┴────┴────┴─┴─┴────┴────┴──┴────┴──┴──┴────────┴──┴──┴────┴──┴────┘ 
+</code></pre><p>So concise.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html">Filtering Vectors</a></h1>
 		
 
