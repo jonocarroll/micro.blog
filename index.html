@@ -51,46 +51,53 @@
 <span style="color:#960050;background-color:#1e0010">┌─────┐</span>
 <span style="color:#960050;background-color:#1e0010">│</span><span style="color:#ae81ff">81119</span><span style="color:#960050;background-color:#1e0010">│</span>
 <span style="color:#960050;background-color:#1e0010">└─────┘</span>
-</code></pre></div><p>and finally enlist down to a scalar</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#66d9ef">{</span><span style="color:#f92672">∊,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵)<span style="color:#66d9ef">}</span><span style="color:#ae81ff">9113</span>
+</code></pre></div><p>and finally enlist down to a scalar and parse as a number again</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#66d9ef">{</span><span style="color:#f92672">⍎∊,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵)<span style="color:#66d9ef">}</span><span style="color:#ae81ff">9113</span>
 <span style="color:#ae81ff">81119</span>
 </code></pre></div><p>Wrapping it into a named defun, it&rsquo;s not all that bad</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      squaredigits<span style="color:#66d9ef">←</span><span style="color:#66d9ef">{</span><span style="color:#f92672">∊,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵)<span style="color:#66d9ef">}</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      squaredigits<span style="color:#66d9ef">←</span><span style="color:#66d9ef">{</span><span style="color:#f92672">⍎∊,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>⍵)<span style="color:#66d9ef">}</span>
       squaredigits <span style="color:#ae81ff">9113</span>
 <span style="color:#ae81ff">81119</span>
 </code></pre></div><p>Is it as nice as the Julia solution?</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia">parse(<span style="color:#66d9ef">Int</span>, join(reverse(digits(num))<span style="color:#f92672">.^</span><span style="color:#ae81ff">2</span>))
 </code></pre></div><p>or, as mentioned in a reply</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia"><span style="color:#66d9ef">using</span> Chain
-[<span style="color:#a6e22e">@chain</span>](https<span style="color:#f92672">://</span>micro<span style="color:#f92672">.</span>blog<span style="color:#f92672">/</span>chain) num digits reverse _<span style="color:#f92672">.^</span><span style="color:#ae81ff">2</span> join parse(<span style="color:#66d9ef">Int</span>, _)
+<span style="color:#a6e22e">@chain</span> num digits reverse _<span style="color:#f92672">.^</span><span style="color:#ae81ff">2</span> join parse(<span style="color:#66d9ef">Int</span>, _)
 </code></pre></div><p>No - I think in this case Julia does a much nicer job; easier to reason and interpret but that comes from having nice wrappers for things like <code>digits</code> (which returns them in reverse order, requiring the <code>reverse</code>). I could absolutely do that in APL, I&rsquo;ve just been trying to do it entirely with primitives, but nice wrappers are nice&hellip;</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">digits<span style="color:#66d9ef">←</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      digits<span style="color:#66d9ef">←</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">¨</span><span style="color:#f92672">⍕</span>
       digits <span style="color:#ae81ff">9113</span>
 <span style="color:#ae81ff">9</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">3</span>
 </code></pre></div><p>same for <code>join</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">join<span style="color:#66d9ef">←</span><span style="color:#f92672">∊</span>(<span style="color:#f92672">,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      join<span style="color:#66d9ef">←</span><span style="color:#f92672">⍎</span><span style="color:#a6e22e">∘</span><span style="color:#f92672">∊</span>(<span style="color:#f92672">,</span><span style="color:#a6e22e">/</span><span style="color:#f92672">⍕</span><span style="color:#a6e22e">¨</span>)
       join <span style="color:#ae81ff">81</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">9</span>
 <span style="color:#ae81ff">81119</span>
 </code></pre></div><p>and heck, square</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">square<span style="color:#66d9ef">←</span><span style="color:#66d9ef">{</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span>⍵<span style="color:#66d9ef">}</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      square<span style="color:#66d9ef">←</span><span style="color:#66d9ef">{</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span>⍵<span style="color:#66d9ef">}</span>
+      square <span style="color:#ae81ff">9</span>
+<span style="color:#ae81ff">81</span>
+</code></pre></div><p>or, since I no longer need the arguments in that order, simply</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      square<span style="color:#66d9ef">←</span><span style="color:#66d9ef">{</span>⍵<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#66d9ef">}</span>
       square <span style="color:#ae81ff">9</span>
 <span style="color:#ae81ff">81</span>
 </code></pre></div><p>so then the APL solution, via composing these three functions, becomes simply</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">squaredigits<span style="color:#66d9ef">←</span>join<span style="color:#a6e22e">∘</span>square<span style="color:#a6e22e">∘</span>digits
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      squaredigits<span style="color:#66d9ef">←</span>join<span style="color:#a6e22e">∘</span>square<span style="color:#a6e22e">∘</span>digits
       squaredigits <span style="color:#ae81ff">9113</span>
 <span style="color:#ae81ff">81119</span>
 </code></pre></div><p>Now <em>THAT&rsquo;s</em> readable!</p>
-<p>Want to see how it works? APL prints out the AST for a function like this</p>
+<p>And yes, it&rsquo;s still a number</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      <span style="color:#ae81ff">1</span><span style="color:#f92672">+</span>squaredigits <span style="color:#ae81ff">9113</span>
+<span style="color:#ae81ff">81120</span>
+</code></pre></div><p>Want to see how it works? APL prints out the AST for a function like this</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">squaredigits
-     <span style="color:#a6e22e">∘</span>      
-    <span style="color:#960050;background-color:#1e0010">┌┴┐</span>     
-    <span style="color:#a6e22e">∘</span> <span style="color:#a6e22e">¨</span>     
-  <span style="color:#960050;background-color:#1e0010">┌─┴─┐</span>     
-<span style="color:#960050;background-color:#1e0010">┌─┴─┐</span> <span style="color:#66d9ef">{</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#a6e22e">⍨</span>⍵<span style="color:#66d9ef">}</span>
-<span style="color:#f92672">∊</span> <span style="color:#960050;background-color:#1e0010">┌─┴─┐</span>     
-  <span style="color:#a6e22e">/</span>   <span style="color:#a6e22e">¨</span>     
-<span style="color:#960050;background-color:#1e0010">┌─┘</span> <span style="color:#960050;background-color:#1e0010">┌─┘</span>     
-<span style="color:#f92672">,</span>     
+      <span style="color:#a6e22e">∘</span>      
+     <span style="color:#960050;background-color:#1e0010">┌┴┐</span>     
+     <span style="color:#a6e22e">∘</span> <span style="color:#a6e22e">¨</span>     
+   <span style="color:#960050;background-color:#1e0010">┌─┴──┐</span>    
+ <span style="color:#960050;background-color:#1e0010">┌─┴──┐</span> <span style="color:#66d9ef">{</span>⍵<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#66d9ef">}</span>
+ <span style="color:#a6e22e">∘</span>  <span style="color:#960050;background-color:#1e0010">┌─┴─┐</span>    
+<span style="color:#960050;background-color:#1e0010">┌</span>   <span style="color:#a6e22e">/</span>   <span style="color:#a6e22e">¨</span>    
+<span style="color:#f92672">∊</span> <span style="color:#960050;background-color:#1e0010">┌─┘</span> <span style="color:#960050;background-color:#1e0010">┌─┘</span>    
+  <span style="color:#f92672">,</span>         
 </code></pre></div><p>I&rsquo;m not nearly done loving what APL can do.</p>
 
 		</div>
@@ -993,9 +1000,9 @@ dots
 end
 
 gif(anim, fps = 24)
-</code></pre><p><img src="https://jcarroll.xyz/uploads/2022/ea5f75012f.gif" alt=""></p>
+</code></pre><p><img src="https://cdn.uploads.micro.blog/64109/2022/ea5f75012f.gif" alt=""></p>
 <p>Moving the points around, I get a new version all of my own</p>
-<p><img src="https://jcarroll.xyz/uploads/2022/b776bf8259.gif" alt=""></p>
+<p><img src="https://cdn.uploads.micro.blog/64109/2022/b776bf8259.gif" alt=""></p>
 <p>I&rsquo;m very happy with how these turned out, and I&rsquo;ve learned a lot! A gist of the code to make these is hosted here: <a href="https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3">https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3</a></p>
 <p>If there are better ways to do any of the steps (there surely are) please feel free to let me know!</p>
 <p>Was this fun? You Bezier ass!</p>
