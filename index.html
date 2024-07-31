@@ -24,6 +24,49 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2024/08/01/book-review-data.html">Book review: Data Analysis with AI and R</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2024/08/01/book-review-data.html" class="u-url"><time class="dt-published" datetime="2024-08-01 09:22:24 &#43;0930">Aug 1, 2024</time></a>
+
+		<div class="e-content">
+			 <p>I published <a href="https://www.manning.com/books/beyond-spreadsheets-with-r">Beyond Spreadsheets with R</a> with Manning Publications partly because they approached me, but a lot because they seem to do a good job of publishing technical books and making them DRM free - if you buy a physical copy you get access to the eBooks to download (pdf, epub, &hellip;) and use as you see fit. I&rsquo;ve received free (well-known) ebooks from other large publishers that I just don&rsquo;t read because it involves installing and opening up a proprietary piece of software just to read the book, and I can&rsquo;t integrate it with any of my notetaking tools.</p>
+<p>After going through the process, I can say that Manning also do a really good job of getting eyes on drafts and providing technical proofreading. I had a panel of reviewers who gave me great feedback on draft chapters and the book was better for it. I&rsquo;m learning a lot of languages and deep diving into more structured programming recently, so I find myself buying a lot of their technical books - it&rsquo;s possible that I&rsquo;ve given back a lot of what I made on Beyond Spreadsheets with R and I&rsquo;m not necessarily disappointed by that.</p>
+<p>I was recently offered a draft (Manning calls these Manning Early Access Program or MEAP editions) of <a href="https://www.manning.com/books/data-analysis-with-ai-and-r">Data Analysis with AI and R</a> by Ulirich Matter and asked if I could share my thoughts. Word of mouth can do great things, and many eyes are very valuable for early drafts. What follows wasn&rsquo;t paid for; I was given an ebook copy of the book to review.</p>
+<p>I&rsquo;m apprehensive but optimistic when it comes to what we&rsquo;re calling AI now (whatever definition we&rsquo;ve had since the 1960s is now irrelevant) and I do wish we&rsquo;d come up with a better term that didn&rsquo;t use the word &ldquo;intelligence&rdquo; so early in the game. I&rsquo;m apprehensive because it&rsquo;s almost certainly being rushed into places it doesn&rsquo;t need to be at great cost to users, companies, and the environment, with results that overlook the human aspect of the problem being solved (the human aspect typically being the most complex). I&rsquo;m optimistic because in the few places where it can be used somewhat &ldquo;safely&rdquo; (of low impact if it&rsquo;s entirely wrong) it&rsquo;s capable of doing some things that a text-matching search can&rsquo;t - I treat a chat LLM like an overconfident coworker and ask it to explain how something I don&rsquo;t understand works. I still need to check to make sure it isn&rsquo;t wrong, but a web search engine can&rsquo;t answer &ldquo;what is this snippet of code doing?&rdquo;</p>
+<p>The first example of Data Analysis with AI and R demonstrates having an LLM try to fix some R code - a simple function that adds two input parameters as <code>a + b</code> that fails when called with a character argument <code>b</code> e.g. <code>b=&quot;5&quot;</code>. The demonstrated LLM offers a new version of the function that has <code>a + as.numeric(b)</code> in the body with a decent explanation of why it failed</p>
+<blockquote>
+<p>Your code is attempting to add a numeric value to a character string, which is causing
+the error. In R, you need to convert the string to a numeric type first. Here’s the
+corrected code:</p>
+</blockquote>
+<p>I think this is a fantastic teachable moment. Keep in mind that we&rsquo;re using R, a dynamically typed language, so preventing this sort of thing at the type level doesn&rsquo;t exist. Someone bitten by this enough times will start to do defensive programming and add assertions to the top of their functions to enforce type constraints according to how their function works internally plus any business logic of how it expects to be used. LLMs don&rsquo;t (typically) have any of that context, and sometimes that&rsquo;s a human component.</p>
+<p>An experienced programmer will recognise the symmetry in the arguments as presented - two values, to be used on either side of a <code>+</code> infix function. The LLM &ldquo;fixes&rdquo; the issue as presented, which is great, but if you stop there and move on you&rsquo;re leaving the potential bug that will bite you when someone tries to use the function with <code>a=&quot;5&quot;</code> and <code>b=5</code>. If you&rsquo;re stuck on something, an LLM can potentially get you unstuck, but it&rsquo;s not a magic bug eraser. It can generate some code that appears suitable as a response and that code may solve the immediate problem, but it&rsquo;s a tool to help you improve, not an actual coworker.</p>
+<p>With that said, I <a href="https://chatgpt.com/share/f2a1fc26-6b57-4d01-88c3-64f0393b5b64">tried the example verbatim</a> into the latest (free) chatGPT and it identified the benefit of converting both arguments, but said in its explanation</p>
+<blockquote>
+<p>In R, you need to ensure that both arguments are of the same type</p>
+</blockquote>
+<p>which isn&rsquo;t strictly true&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">typeof</span>(a <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">5</span>)
+<span style="color:#75715e"># [1] &#34;double&#34;</span>
+<span style="color:#a6e22e">typeof</span>(b <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">5L</span>)
+<span style="color:#75715e"># [1] &#34;integer&#34;</span>
+<span style="color:#a6e22e">typeof</span>(c <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">5+5i</span>)
+<span style="color:#75715e"># [1] &#34;complex&#34;</span>
+a<span style="color:#f92672">+</span>b<span style="color:#f92672">+</span>c
+<span style="color:#75715e"># [1] 15+5i</span>
+</code></pre></div><p>Again, ask for advice, but treat it with suspicion.</p>
+<p>The rest of the available 3 chapters covers a lot of interesting topics, many of which I wasn&rsquo;t familiar with such as setting system messages (the internal prompt) via the API, the PAL (Programming-Aided Language Models) approach, and generating embeddings of some input text.</p>
+<p>I had a handful of suggestions based on what I&rsquo;d read which, for a regular, already published book, <em>might</em> get sent to the author to be listed on an errata page somewhere. For a MEAP book, Manning has a discussion forum where readers can ask questions, submit suggestions/corrections, etc&hellip; so that the book can be improved <em>before</em> it&rsquo;s published. I was very happy to have this available for Beyond Spreadsheets with R (<a href="https://livebook.manning.com/forum?product=carroll&amp;p=1&amp;page=1">forum</a>) so I <a href="https://livebook.manning.com/forum?product=matter&amp;comment=571431">submitted my notes/questions</a> there and hoped the author might have had a chance to respond before I wrote this, but not yet it seems.</p>
+<p>Overall, I&rsquo;m pleased with what I read so far - there&rsquo;s a lot in there about how to interact with the models via the API in an R way, including having it help write tests, documentation, and entire functions. I&rsquo;m looking forward to the rest of the book.</p>
+<p>I think it&rsquo;s brave to try to write a book about a field that&rsquo;s changing quite so fast, but most of the principles should still apply for at least a while, even if the screenshots of website menus are quickly outdated.</p>
+<p>So far, this one has my recommendation. I don&rsquo;t think I&rsquo;ve seen any R-related resources that have anywhere near this level of detail. If you&rsquo;re interested in a copy, I believe Manning has a sale at the moment and <a href="https://deals.manning.com/save-half-sitewide-for-the-end-of-july/">all products sitewide are 50% off</a> (including Beyond Spreadsheets with R, FYI).</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2024/06/06/enums-in-r.html">Enums in R</a></h1>
 		
 
@@ -971,6 +1014,8 @@ else:
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html">Currently reading: Living in Data by Jer Thorp 📚</a></h1>
+		
 
 		<a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-20 21:11:45 &#43;0930">Jan 20, 2023</time></a>
 
@@ -1295,9 +1340,9 @@ dots
 end
 
 gif(anim, fps = 24)
-</code></pre><p><img src="https://cdn.uploads.micro.blog/64109/2022/ea5f75012f.gif" alt=""></p>
+</code></pre><p><img src="https://jcarroll.xyz/uploads/2022/ea5f75012f.gif" alt=""></p>
 <p>Moving the points around, I get a new version all of my own</p>
-<p><img src="https://cdn.uploads.micro.blog/64109/2022/b776bf8259.gif" alt=""></p>
+<p><img src="https://jcarroll.xyz/uploads/2022/b776bf8259.gif" alt=""></p>
 <p>I&rsquo;m very happy with how these turned out, and I&rsquo;ve learned a lot! A gist of the code to make these is hosted here: <a href="https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3">https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3</a></p>
 <p>If there are better ways to do any of the steps (there surely are) please feel free to let me know!</p>
 <p>Was this fun? You Bezier ass!</p>
