@@ -24,6 +24,132 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2024/08/04/r-function-call.html">R function call overhead</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2024/08/04/r-function-call.html" class="u-url"><time class="dt-published" datetime="2024-08-04 17:01:30 &#43;0930">Aug 4, 2024</time></a>
+
+		<div class="e-content">
+			 <p>I&rsquo;m entirely perplexed by this - I was exploring an idea I saw discussed in a blog post (that will have to wait for now - I&rsquo;ll come back to it) and found some interesting behaviour I don&rsquo;t understand.</p>
+<p>I managed to boil the issue down to the following: let&rsquo;s say I have a function that does something with all the values of an array, in this case adds 1 to each element (not returning it). I might define that like this</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">add_inline <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) { <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) z[i] <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> }
+</code></pre></div><p>Sure, I could do something more &ldquo;functional&rdquo; but that&rsquo;s the point and I&rsquo;ll come back to that.</p>
+<p>Now, what if I add a single layer of abstraction - the adding of 1 is defined in a function</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">f <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(x) x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+add_call <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) { <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) <span style="color:#a6e22e">f</span>(z[i]) }
+</code></pre></div><p>I thought perhaps that the scoping of that function, in that R needs to look through all the loaded packages before finding it in the global scope might matter, so I also added a version where <code>f</code> is defined more locally</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">add_call_local <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) {
+  localf <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(x) x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+  <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) {
+    <span style="color:#a6e22e">localf</span>(z[i])
+  }
+}
+</code></pre></div><p>Just in case there was any funny business with named function lookup, how about an anonymous function version?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">add_call_anon <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) {
+  <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) {
+    (<span style="color:#a6e22e">\</span>(x) x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)(z[i])
+  }
+}
+</code></pre></div><p>Okay, now let&rsquo;s look at the comparative performance of each of these</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">n <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">1e4</span>
+bm <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::</span><span style="color:#a6e22e">mark</span>(
+  inline <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_inline</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  call <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_call</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  local <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_call_local</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  anon <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_call_anon</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+)
+<span style="color:#a6e22e">plot</span>(bm)
+</code></pre></div><p><img src="https://i.imgur.com/B5jRwTO.png" alt=""><!-- raw HTML omitted --></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bm[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
+<span style="color:#75715e">#&gt; # A tibble: 4 × 6</span>
+<span style="color:#75715e">#&gt;   expression      min   median `itr/sec` mem_alloc `gc/sec`</span>
+<span style="color:#75715e">#&gt;   &lt;bch:expr&gt; &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span>
+<span style="color:#75715e">#&gt; 1 inline     414.73µs 444.43µs     2178.    3.94MB      0  </span>
+<span style="color:#75715e">#&gt; 2 call         5.38ms   5.83ms      169.  113.74KB     20.8</span>
+<span style="color:#75715e">#&gt; 3 local        5.22ms    5.6ms      174.   76.47KB     19.3</span>
+<span style="color:#75715e">#&gt; 4 anon         5.85ms   6.29ms      157.   35.06KB     23.4</span>
+</code></pre></div><p>What? There&rsquo;s a 10x difference between inlining <code>x + 1</code> and calling out to a function.</p>
+<p>How does that scale? I made a similar comparison with the addition five times</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">add5_inline <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) { <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) z[i] <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>}
+add5_call <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) { <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) <span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">f</span>(z[i]))))) }
+
+n <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">1e4</span>
+bm5 <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::</span><span style="color:#a6e22e">mark</span>(
+  inline <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_inline</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  call <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_call</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  inline5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">add5_inline</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  call5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">add5_call</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+)
+<span style="color:#a6e22e">plot</span>(bm5)
+</code></pre></div><p><img src="https://i.imgur.com/esmKs7U.png" alt=""><!-- raw HTML omitted --></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bm5[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
+<span style="color:#75715e">#&gt; # A tibble: 4 × 6</span>
+<span style="color:#75715e">#&gt;   expression      min   median `itr/sec` mem_alloc `gc/sec`</span>
+<span style="color:#75715e">#&gt;   &lt;bch:expr&gt; &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span>
+<span style="color:#75715e">#&gt; 1 inline      509.3µs   2.06ms     511.         0B     0   </span>
+<span style="color:#75715e">#&gt; 2 call          5.3ms    5.6ms     125.         0B     8.00</span>
+<span style="color:#75715e">#&gt; 3 inline5       746µs 773.44µs    1237.     38.1KB     0   </span>
+<span style="color:#75715e">#&gt; 4 call5        20.5ms  21.53ms      46.2    18.5KB    13.8</span>
+</code></pre></div><p>That&rsquo;s nearly 30x difference.</p>
+<p>Now, that&rsquo;s over 10,000 calls, so it&rsquo;s not a whole lot for a <em>single</em> call, but for many, it adds up! Especially inside a hot loop.</p>
+<p>What if we actually do something with the values? I added in a <code>sapply</code> version but it <em>has</em> to take a function, so there&rsquo;s no strict comparison to inlining it</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">add3_inline <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) { a <span style="color:#f92672">&lt;-</span> z[NA]; <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) a[i] <span style="color:#f92672">&lt;-</span> z[i] <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>; a }
+f3 <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(x) <span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">f</span>(<span style="color:#a6e22e">f</span>(x)))
+add3_call <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) { a <span style="color:#f92672">&lt;-</span> z[NA]; <span style="color:#a6e22e">for </span>(i in <span style="color:#a6e22e">seq_along</span>(z)) a[i] <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">f3</span>(z[i]); a }
+add3_sapply_call <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(z) { <span style="color:#a6e22e">sapply</span>(z, f3) }
+
+n <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">1e4</span>
+bms <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::</span><span style="color:#a6e22e">mark</span>(
+  inline <span style="color:#f92672">=</span> <span style="color:#a6e22e">add3_inline</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  call <span style="color:#f92672">=</span> <span style="color:#a6e22e">add3_call</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  sapply_call <span style="color:#f92672">=</span> <span style="color:#a6e22e">add3_sapply_call</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+)
+<span style="color:#a6e22e">plot</span>(bms)
+</code></pre></div><p><img src="https://i.imgur.com/7wWxAWp.png" alt=""><!-- raw HTML omitted --></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bms[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
+<span style="color:#75715e">#&gt; # A tibble: 3 × 6</span>
+<span style="color:#75715e">#&gt;   expression       min   median `itr/sec` mem_alloc `gc/sec`</span>
+<span style="color:#75715e">#&gt;   &lt;bch:expr&gt;  &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span>
+<span style="color:#75715e">#&gt; 1 inline       991.8µs   1.08ms     897.      186KB      0  </span>
+<span style="color:#75715e">#&gt; 2 call            18ms  18.73ms      52.4     184KB     12.3</span>
+<span style="color:#75715e">#&gt; 3 sapply_call   19.2ms  21.19ms      46.8     363KB     13.2</span>
+</code></pre></div><p>Still, 18x?</p>
+<p>I don&rsquo;t know how to explain this apart from &ldquo;there&rsquo;s a not-insignificant overhead to calling a function vs inlining the body&rdquo;. Have I missed something?</p>
+<p>R is usually &ldquo;fast enough&rdquo; for everything I do - I&rsquo;m rarely trying to cram a lot of evaluations inside a given millisecond, but I was surprised that this single abstraction added so much. I&rsquo;m imagining a heavy calculation inside a hot loop involving a lot of composed function calls and wondering how much could be saved by consolidating the composition into a single function body?</p>
+<p>Just for context of how &ldquo;slow&rdquo; this is, I wanted to see how Rust performs and &hellip; ouch.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">rextendr<span style="color:#f92672">::</span><span style="color:#a6e22e">rust_function</span>(<span style="color:#e6db74">&#34;fn add3_rust(z:Vec&lt;i32&gt;) -&gt; Vec&lt;i32&gt; { z.iter().map(|x| x + 3).collect() }&#34;</span>, profile <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;release&#34;</span>)
+<span style="color:#75715e">#&gt; ℹ build directory: &#39;/tmp/RtmpqsZ3jP/file73e7742716b8f&#39;</span>
+<span style="color:#75715e">#&gt; ✔ Writing &#39;/tmp/RtmpqsZ3jP/file73e7742716b8f/target/extendr_wrappers.R&#39;</span>
+
+n <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">1e4</span>
+bmr <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::</span><span style="color:#a6e22e">mark</span>(
+  inline <span style="color:#f92672">=</span> <span style="color:#a6e22e">add3_inline</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  call <span style="color:#f92672">=</span> <span style="color:#a6e22e">add3_call</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  sapply_call <span style="color:#f92672">=</span> <span style="color:#a6e22e">add3_sapply_call</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  rust <span style="color:#f92672">=</span> <span style="color:#a6e22e">add3_rust</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>n),
+  iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+)
+<span style="color:#a6e22e">plot</span>(bmr)
+</code></pre></div><p><img src="https://i.imgur.com/ElECsgG.png" alt=""><!-- raw HTML omitted --></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bmr[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
+<span style="color:#75715e">#&gt; # A tibble: 4 × 6</span>
+<span style="color:#75715e">#&gt;   expression       min   median `itr/sec` mem_alloc `gc/sec`</span>
+<span style="color:#75715e">#&gt;   &lt;bch:expr&gt;  &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span>
+<span style="color:#75715e">#&gt; 1 inline        1.03ms   1.08ms     925.    156.4KB      0  </span>
+<span style="color:#75715e">#&gt; 2 call         18.52ms  21.53ms      41.7   156.4KB     11.8</span>
+<span style="color:#75715e">#&gt; 3 sapply_call  19.79ms   23.6ms      41.8   362.6KB     13.2</span>
+<span style="color:#75715e">#&gt; 4 rust         18.37µs  24.21µs   14165.     78.2KB      0</span>
+</code></pre></div><p>Yeah, my best R is 40x slower than Rust (the <code>f3(x)</code> R version 875x slower than Rust) at this particular example. I love the idea of calling out to Rust for performance, and will definitely be doing that a bit more.</p>
+<p>If you have an explanation about the function calling overhead, please let me know here or on <a href="https://fosstodon.org/@jonocarroll">Mastodon</a>.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2024/08/01/book-review-data.html">Book review: Data Analysis with AI and R</a></h1>
 		
 
@@ -1340,9 +1466,9 @@ dots
 end
 
 gif(anim, fps = 24)
-</code></pre><p><img src="https://jcarroll.xyz/uploads/2022/ea5f75012f.gif" alt=""></p>
+</code></pre><p><img src="https://cdn.uploads.micro.blog/64109/2022/ea5f75012f.gif" alt=""></p>
 <p>Moving the points around, I get a new version all of my own</p>
-<p><img src="https://jcarroll.xyz/uploads/2022/b776bf8259.gif" alt=""></p>
+<p><img src="https://cdn.uploads.micro.blog/64109/2022/b776bf8259.gif" alt=""></p>
 <p>I&rsquo;m very happy with how these turned out, and I&rsquo;ve learned a lot! A gist of the code to make these is hosted here: <a href="https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3">https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3</a></p>
 <p>If there are better ways to do any of the steps (there surely are) please feel free to let me know!</p>
 <p>Was this fun? You Bezier ass!</p>
