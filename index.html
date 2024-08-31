@@ -24,6 +24,43 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html">Leap Years with GCD in various langauges</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html" class="u-url"><time class="dt-published" datetime="2024-08-19 18:50:21 &#43;0930">Aug 19, 2024</time></a>
+
+		<div class="e-content">
+			 <p>I saw <a href="https://fpilluminated.com/allSlides/238">this deck</a> via <a href="https://discu.eu/weekly/haskell/2024/33/">Haskell Weekly Recap</a> which noted an interesting property:</p>
+<blockquote>
+<p>&ldquo;x is a leap year if and only if <code>gcd(80, x) &gt; gcd(50, x)</code>&rdquo;</p>
+</blockquote>
+<p>(gcd = &lsquo;greatest common divisor&rsquo;) which I haven&rsquo;t fully appreciated the origin of, but wanted to try some implementations. The deck shows a Haskell version</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-haskell" data-lang="haskell"><span style="color:#a6e22e">leapyear</span> <span style="color:#f92672">=</span> liftA2 (<span style="color:#f92672">&gt;</span>) (gcd <span style="color:#ae81ff">80</span>) (gcd <span style="color:#ae81ff">50</span>)
+<span style="color:#a6e22e">filter</span> leapyear [<span style="color:#ae81ff">1890</span><span style="color:#f92672">..</span><span style="color:#ae81ff">1920</span>]
+[<span style="color:#ae81ff">1892</span>,<span style="color:#ae81ff">1896</span>,<span style="color:#ae81ff">1904</span>,<span style="color:#ae81ff">1908</span>,<span style="color:#ae81ff">1912</span>,<span style="color:#ae81ff">1916</span>,<span style="color:#ae81ff">1920</span>]
+</code></pre></div><p>and it took me a few minutes to fully grasp, but once I did, I&rsquo;m very happy with it. I recently worked through <a href="https://adueck.github.io/blog/functors-applicatives-and-monads-with-pictures-in-typescript/">this fantastic post</a> explaining Functors, Applicatives, and Monads using a mix of Haskell and Typescript and it actually sunk in.</p>
+<p>What other languages could I try? Of course, I had to try R</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">leapyear <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(year) {
+  pracma<span style="color:#f92672">::</span><span style="color:#a6e22e">gcd</span>(<span style="color:#ae81ff">80</span>, year) <span style="color:#f92672">&gt;</span> pracma<span style="color:#f92672">::</span><span style="color:#a6e22e">gcd</span>(<span style="color:#ae81ff">50</span>, year)
+}
+<span style="color:#a6e22e">Filter</span>(leapyear, <span style="color:#ae81ff">1890</span><span style="color:#f92672">:</span><span style="color:#ae81ff">1920</span>)
+<span style="color:#75715e">#&gt; [1] 1892 1896 1904 1908 1912 1916 1920</span>
+</code></pre></div><p>No point-free coding here, we need an actual argument to the function. It&rsquo;s also disappointing that R doesn&rsquo;t have a built-in greatest common divisor, so calling out to a package for that one. Otherwise, I&rsquo;m not disappointed by this.</p>
+<p>This brought me to wanting to try it in (Dylog) APL which <em>does</em> have a built-in GCD (<code>∨</code>) and does tacit/point-free quite nicely</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">      leapyear <span style="color:#66d9ef">←</span> (<span style="color:#ae81ff">80</span><span style="color:#f92672">∨⊣</span>) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">50</span><span style="color:#f92672">∨⊢</span>
+      years <span style="color:#66d9ef">←</span> <span style="color:#ae81ff">1890</span><span style="color:#f92672">+⍳</span><span style="color:#ae81ff">30</span>
+      (leapyear years)<span style="color:#a6e22e">⌿</span>years
+<span style="color:#ae81ff">1892</span> <span style="color:#ae81ff">1896</span> <span style="color:#ae81ff">1904</span> <span style="color:#ae81ff">1908</span> <span style="color:#ae81ff">1912</span> <span style="color:#ae81ff">1916</span> <span style="color:#ae81ff">1920</span>
+</code></pre></div><p>It took me a few attempts to get the tacit bits working but this is also quite nice, I feel.</p>
+<p>Fun stuff!!!</p>
+<p><em>Edit:</em> After a really interesting meetup with some J programmers, I realised I can use bind (<code>∘</code>) to make this properly tacit in APL</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-apl" data-lang="apl">leapyear<span style="color:#66d9ef">←</span>(<span style="color:#ae81ff">80</span><span style="color:#a6e22e">∘</span><span style="color:#f92672">∨</span>)<span style="color:#f92672">&gt;</span>(<span style="color:#ae81ff">50</span><span style="color:#a6e22e">∘</span><span style="color:#f92672">∨</span>)
+</code></pre></div>
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2024/08/04/r-function-call.html">R function call overhead</a></h1>
 		
 
@@ -1466,9 +1503,9 @@ dots
 end
 
 gif(anim, fps = 24)
-</code></pre><p><img src="https://jcarroll.xyz/uploads/2022/ea5f75012f.gif" alt=""></p>
+</code></pre><p><img src="https://cdn.uploads.micro.blog/64109/2022/ea5f75012f.gif" alt=""></p>
 <p>Moving the points around, I get a new version all of my own</p>
-<p><img src="https://jcarroll.xyz/uploads/2022/b776bf8259.gif" alt=""></p>
+<p><img src="https://cdn.uploads.micro.blog/64109/2022/b776bf8259.gif" alt=""></p>
 <p>I&rsquo;m very happy with how these turned out, and I&rsquo;ve learned a lot! A gist of the code to make these is hosted here: <a href="https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3">https://gist.github.com/jonocarroll/27f9b57332424ea50ec2970e74d8e3b3</a></p>
 <p>If there are better ways to do any of the steps (there surely are) please feel free to let me know!</p>
 <p>Was this fun? You Bezier ass!</p>
