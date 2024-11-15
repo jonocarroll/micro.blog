@@ -24,10 +24,35 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2024/11/15/quick-note-functions.html">Quick Note: Functions in Haskell</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2024/11/15/quick-note-functions.html" class="u-url"><time class="dt-published" datetime="2024-11-15 12:17:12 &#43;1030">Nov 15, 2024</time></a>
+
+		<div class="e-content">
+			 <p>Another throwaway comment that sort of blew my mind recently; I am making my way through <a href="https://www.youtube.com/watch?v=nlTJU8wLo7E&amp;list=PLu6SHDdOToSe7ZOw-mR55j2GEjkNTQgrd">Haskell For Dilettantes</a> and I&rsquo;m very much enjoying the lectures and exercises. A sidebar video (Part 4) explains that &lsquo;space&rsquo; performs function application. The example given is</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-haskell" data-lang="haskell"><span style="color:#a6e22e">addTwoInts</span> <span style="color:#f92672">::</span> <span style="color:#66d9ef">Int</span> <span style="color:#960050;background-color:#1e0010">→</span> <span style="color:#66d9ef">Int</span> <span style="color:#960050;background-color:#1e0010">→</span> <span style="color:#66d9ef">Int</span>
+<span style="color:#a6e22e">addTwoInts</span> x y <span style="color:#f92672">=</span> x <span style="color:#f92672">+</span> y
+
+<span style="color:#a6e22e">addTwoInts</span> <span style="color:#ae81ff">5</span> <span style="color:#ae81ff">7</span>
+</code></pre></div><p>In another language one might write <code>addTwoInts(5, 7)</code> but due to partial application (currying) one can write this as a function that takes one argument returning a function that takes one argument; <code>addTwoInts(5)(7)</code>. That first part is achieved in Haskell by writing <code>addTwoInts 5</code>, or the entire thing very equivalently by replacing all the runs of parentheses with a space (!).</p>
+<pre tabindex="0"><code>addTwoInts(5)(7) === addTwoInts 5 7
+</code></pre><p>which means that the space performs the operation of applying the function, in the way that parentheses do in some other languages.</p>
+<p>I had never thought of it that way, even though I&rsquo;m familiar with the idea of the &lsquo;functions returning functions&rsquo; paradigm.</p>
+<p>One other thing that caught my attention early on was that variable assignment is <em>also</em> function assignment&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-haskell" data-lang="haskell"><span style="color:#a6e22e">x</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</code></pre></div><p>is a &ldquo;function which takes <em>no</em> arguments and returns the value <code>3</code>&rdquo; (!).</p>
+<p>Maybe these are things one learns when being taught such a language formally, but as a self-directed learner of this it&rsquo;s fascinating to learn them after so much of the basic syntax and grammar. Great stuff.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2024/09/18/bringing-type-checking.html">Bringing type checking to R</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/09/18/bringing-type-checking.html" class="u-url"><time class="dt-published" datetime="2024-09-18 09:34:41 &#43;0930">Sep 18, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/09/18/bringing-type-checking.html" class="u-url"><time class="dt-published" datetime="2024-09-18 10:34:41 &#43;1030">Sep 18, 2024</time></a>
 
 		<div class="e-content">
 			 <p>Another &lsquo;toot that became too long&rsquo; post, this time about dynamically vs strictly typed languages. <a href="https://vapour.run/">Vapour</a> is a new language that just dropped that has strict typing and transpiles to R (dynamic types) which means developers can write and refactor code with all the benefits of a type-checker and still end up with plain R code. I love the idea and have been playing around with it pretty much since I heard about it.</p>
@@ -48,7 +73,7 @@
 			<h1><a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html">Leap Years with GCD in various languages</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html" class="u-url"><time class="dt-published" datetime="2024-08-19 18:50:21 &#43;0930">Aug 19, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html" class="u-url"><time class="dt-published" datetime="2024-08-19 19:50:21 &#43;1030">Aug 19, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I saw <a href="https://fpilluminated.com/allSlides/238">this deck</a> via <a href="https://discu.eu/weekly/haskell/2024/33/">Haskell Weekly Recap</a> which noted an interesting property:</p>
@@ -85,7 +110,7 @@
 			<h1><a href="https://jcarroll.xyz/2024/08/04/r-function-call.html">R function call overhead</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/08/04/r-function-call.html" class="u-url"><time class="dt-published" datetime="2024-08-04 17:01:30 &#43;0930">Aug 4, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/08/04/r-function-call.html" class="u-url"><time class="dt-published" datetime="2024-08-04 18:01:30 &#43;1030">Aug 4, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m entirely perplexed by this - I was exploring an idea I saw discussed in a blog post (that will have to wait for now - I&rsquo;ll come back to it) and found some interesting behaviour I don&rsquo;t understand.</p>
@@ -211,7 +236,7 @@ bmr <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::
 			<h1><a href="https://jcarroll.xyz/2024/08/01/book-review-data.html">Book review: Data Analysis with AI and R</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/08/01/book-review-data.html" class="u-url"><time class="dt-published" datetime="2024-08-01 09:22:24 &#43;0930">Aug 1, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/08/01/book-review-data.html" class="u-url"><time class="dt-published" datetime="2024-08-01 10:22:24 &#43;1030">Aug 1, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I published <a href="https://www.manning.com/books/beyond-spreadsheets-with-r">Beyond Spreadsheets with R</a> with Manning Publications partly because they approached me, but a lot because they seem to do a good job of publishing technical books and making them DRM free - if you buy a physical copy you get access to the eBooks to download (pdf, epub, &hellip;) and use as you see fit. I&rsquo;ve received free (well-known) ebooks from other large publishers that I just don&rsquo;t read because it involves installing and opening up a proprietary piece of software just to read the book, and I can&rsquo;t integrate it with any of my notetaking tools.</p>
@@ -254,7 +279,7 @@ a<span style="color:#f92672">+</span>b<span style="color:#f92672">+</span>c
 			<h1><a href="https://jcarroll.xyz/2024/06/06/enums-in-r.html">Enums in R</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/06/06/enums-in-r.html" class="u-url"><time class="dt-published" datetime="2024-06-06 11:23:02 &#43;0930">Jun 6, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/06/06/enums-in-r.html" class="u-url"><time class="dt-published" datetime="2024-06-06 12:23:02 &#43;1030">Jun 6, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m looping back to reading some of <a href="https://design.tidyverse.org/">Tidy Design Principles</a> since it hasn&rsquo;t been touched in a while (indicating some stability, at least in the short term). I jumped ahead to a <a href="https://design.tidyverse.org/boolean-strategies.html">section on enums</a> out of curiosity and pondered on them a bit more - they&rsquo;re <em>really</em> useful in Rust, maybe there&rsquo;s a good way to implement them in R.</p>
@@ -327,7 +352,7 @@ GridShape<span style="color:#f92672">@</span>Square
 			<h1><a href="https://jcarroll.xyz/2024/06/01/how-do-you.html">How do you do personal knowledge management?</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/06/01/how-do-you.html" class="u-url"><time class="dt-published" datetime="2024-06-01 14:57:26 &#43;0930">Jun 1, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/06/01/how-do-you.html" class="u-url"><time class="dt-published" datetime="2024-06-01 15:57:26 &#43;1030">Jun 1, 2024</time></a>
 
 		<div class="e-content">
 			 <p>This post is a bit of a brain dump / working-out-loud thing. The posts here on <a href="https://jcarroll.xyz">jcarroll.xyz</a> are less formal than what I put on my main blog <a href="https://jcarroll.com.au">jcarroll.com.au </a> which is more for technical articles on coding. There won&rsquo;t be any code in this post. This was built up from a series of notes captured over a couple of weeks or so, which makes for a somewhat longer, bordering on rambling post, so &hellip; sorry, I guess?</p>
@@ -382,7 +407,7 @@ GridShape<span style="color:#f92672">@</span>Square
 			<h1><a href="https://jcarroll.xyz/2024/05/06/on-content-creation.html">On content creation motivation</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/05/06/on-content-creation.html" class="u-url"><time class="dt-published" datetime="2024-05-06 09:18:06 &#43;0930">May 6, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/05/06/on-content-creation.html" class="u-url"><time class="dt-published" datetime="2024-05-06 10:18:06 &#43;1030">May 6, 2024</time></a>
 
 		<div class="e-content">
 			 <p>(this was going to be a (series of) toot(s) but it got too waaay too long)</p>
@@ -408,7 +433,7 @@ GridShape<span style="color:#f92672">@</span>Square
 			<h1><a href="https://jcarroll.xyz/2024/03/15/fuzzy-grouping.html">Fuzzy Grouping</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/03/15/fuzzy-grouping.html" class="u-url"><time class="dt-published" datetime="2024-03-15 12:51:32 &#43;0930">Mar 15, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/03/15/fuzzy-grouping.html" class="u-url"><time class="dt-published" datetime="2024-03-15 13:51:32 &#43;1030">Mar 15, 2024</time></a>
 
 		<div class="e-content">
 			 <p>A former colleague got in touch recently with a question about how one might perform the following grouping operation&hellip;</p>
@@ -512,7 +537,7 @@ meddata <span style="color:#f92672">|&gt;</span>
 			<h1><a href="https://jcarroll.xyz/2024/02/10/friends-romans-countrymen.html">Friends, Romans, Countrymen, lend me your debuggers</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/02/10/friends-romans-countrymen.html" class="u-url"><time class="dt-published" datetime="2024-02-10 15:57:10 &#43;0930">Feb 10, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/02/10/friends-romans-countrymen.html" class="u-url"><time class="dt-published" datetime="2024-02-10 16:57:10 &#43;1030">Feb 10, 2024</time></a>
 
 		<div class="e-content">
 			 <p>This was just going to be a short toot, but it keeps growing so I moved it over to here.</p>
@@ -549,7 +574,7 @@ x
 			<h1><a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html">Breaking down squared digits in (Dyalog) APL</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html" class="u-url"><time class="dt-published" datetime="2023-11-16 09:17:56 &#43;0930">Nov 16, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html" class="u-url"><time class="dt-published" datetime="2023-11-16 10:17:56 &#43;1030">Nov 16, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I love small challenges as a way to learn a language. I spotted <a href="https://mastodon.social/@krz/111415569841445388">this one</a> in the #rstats hashtag on Mastodon</p>
@@ -630,7 +655,7 @@ x
 			<h1><a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html">Breaking down fizzbuzz in (Dyalog) APL</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html" class="u-url"><time class="dt-published" datetime="2023-11-10 21:19:05 &#43;0930">Nov 10, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html" class="u-url"><time class="dt-published" datetime="2023-11-10 22:19:05 &#43;1030">Nov 10, 2023</time></a>
 
 		<div class="e-content">
 			 <p>The one-liner solution: <code>{∊(3↑(0=3 5|⍵)∪1)/'Fizz' 'Buzz' ⍵}¨⍳20</code></p>
@@ -674,7 +699,7 @@ should be &ldquo;fizz&rdquo; <code>(1 0)</code>, &ldquo;buzz&rdquo; <code>(0 1)<
 			<h1><a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html">Filtering Vectors</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html" class="u-url"><time class="dt-published" datetime="2023-07-03 13:18:59 &#43;0930">Jul 3, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html" class="u-url"><time class="dt-published" datetime="2023-07-03 14:18:59 &#43;1030">Jul 3, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I saw a YouTube short demonstrating how to use <code>filter()</code> in Python along the lines of</p>
@@ -735,7 +760,7 @@ primes
 			<h1><a href="https://jcarroll.xyz/2023/06/14/around-the-web.html">Around the web 2023W24</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/06/14/around-the-web.html" class="u-url"><time class="dt-published" datetime="2023-06-16 13:20:20 &#43;0930">Jun 16, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/06/14/around-the-web.html" class="u-url"><time class="dt-published" datetime="2023-06-16 14:20:20 &#43;1030">Jun 16, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I think I&rsquo;m happy with my <a href="https://feedrabbit.com/">RSS-to-email</a> setup now but I feel like I&rsquo;m only passively reading things and can do better. I&rsquo;m going to try summarising (on this micro blog) the interesting posts I see (RSS feeds, newsletters, social feeds, general web finds) as a way to share some links, to be able to find them again later, and to reinforce what I&rsquo;m learning. This is informal, largely unstructured, largely unedited, and possibly only interesting to me, but if you don&rsquo;t like it then don&rsquo;t read it. Feel free to comment (here or elsewhere) and start a conversation on any of the topics (or anything).</p>
@@ -883,7 +908,7 @@ primes
 			<h1><a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html">FizzBuzz without an if</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html" class="u-url"><time class="dt-published" datetime="2023-05-12 16:11:17 &#43;0930">May 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html" class="u-url"><time class="dt-published" datetime="2023-05-12 17:11:17 &#43;1030">May 12, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Apparently using an <code>if</code> to solve <a href="https://en.wikipedia.org/wiki/Fizz_buzz">FizzBuzz</a> is a sign that you&rsquo;re <a href="https://youtu.be/GfNBZ7awHGo?t=545">not a great programmer</a>&hellip; Well, that&rsquo;s how I would have done it :-(</p>
@@ -916,7 +941,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/04/12/finished-reading-bullshit.html">Finished reading: Bullshit Jobs by David Graeber 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-bullshit.html" class="u-url"><time class="dt-published" datetime="2023-04-12 10:10:58 &#43;0930">Apr 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-bullshit.html" class="u-url"><time class="dt-published" datetime="2023-04-12 11:10:58 &#43;1030">Apr 12, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780241267363">Bullshit Jobs</a> by David Graeber 📚</p>
@@ -937,7 +962,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/04/12/finished-reading-soonish.html">Finished reading: Soonish by Kelly and Zach Weinersmith 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-soonish.html" class="u-url"><time class="dt-published" datetime="2023-04-12 09:40:51 &#43;0930">Apr 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-soonish.html" class="u-url"><time class="dt-published" datetime="2023-04-12 10:40:51 &#43;1030">Apr 12, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781846149009">Soonish</a> by Kelly and Zach Weinersmith 📚</p>
@@ -954,7 +979,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/04/12/finished-reading-version.html">Finished reading: Version Zero by David Yoon 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-version.html" class="u-url"><time class="dt-published" datetime="2023-04-12 09:32:53 &#43;0930">Apr 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-version.html" class="u-url"><time class="dt-published" datetime="2023-04-12 10:32:53 &#43;1030">Apr 12, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780593190371">Version Zero</a> by David Yoon 📚</p>
@@ -971,7 +996,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/12/finished-reading-eastern.html">Finished reading: Eastern Standard Tribe by Cory Doctorow 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-eastern.html" class="u-url"><time class="dt-published" datetime="2023-03-12 13:20:32 &#43;0930">Mar 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-eastern.html" class="u-url"><time class="dt-published" datetime="2023-03-12 14:20:32 &#43;1030">Mar 12, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780007327942">Eastern Standard Tribe</a> by Cory Doctorow 📚</p>
@@ -986,7 +1011,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/12/finished-reading-chess.html">Finished reading: 500 Chess Questions Answered by Andrew Soltis 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-chess.html" class="u-url"><time class="dt-published" datetime="2023-03-12 13:09:11 &#43;0930">Mar 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-chess.html" class="u-url"><time class="dt-published" datetime="2023-03-12 14:09:11 &#43;1030">Mar 12, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781849947596">500 Chess Questions Answered</a> by Andrew Soltis 📚</p>
@@ -1002,7 +1027,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/220456.html">Finished reading: The Apocalypse Seven by Gene Doucette 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/220456.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:04:56 &#43;0930">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/220456.html" class="u-url"><time class="dt-published" datetime="2023-03-05 22:04:56 &#43;1030">Mar 5, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780358418948">The Apocalypse Seven</a> by Gene Doucette 📚</p>
@@ -1019,7 +1044,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/215624.html">Finished reading: The Phoenix Project by Gene Kim 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/215624.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:56:24 &#43;0930">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/215624.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:56:24 &#43;1030">Mar 5, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781942788294">The Phoenix Project</a> by Gene Kim 📚</p>
@@ -1036,7 +1061,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-jellyfish.html">Finished reading: Jellyfish Age Backwards by Nicklas Brendborg 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-jellyfish.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:45:44 &#43;0930">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-jellyfish.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:45:44 &#43;1030">Mar 5, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781529387926">Jellyfish Age Backwards</a> by Nicklas Brendborg 📚</p>
@@ -1051,7 +1076,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-the.html">Finished reading: The Spaceship Next Door by Gene Doucette 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:41:05 &#43;0930">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:41:05 &#43;1030">Mar 5, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781328567543">The Spaceship Next Door</a> by Gene Doucette 📚</p>
@@ -1067,7 +1092,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-human.html">Finished reading: 10% Human: How Your Body’s Microbes Hold The Key To Health And Happiness by Alanna Collen 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-human.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:34:13 &#43;0930">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-human.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:34:13 &#43;1030">Mar 5, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780007584048">10% Human: How Your Body’s Microbes Hold The Key To Health And Happiness</a> by Alanna Collen 📚</p>
@@ -1084,7 +1109,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-once.html">Finished reading: Once Upon an Algorithm by Martin Erwig 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-once.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:22:04 &#43;0930">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-once.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:22:04 &#43;1030">Mar 5, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780262545297">Once Upon an Algorithm</a> by Martin Erwig 📚</p>
@@ -1100,7 +1125,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html">Finished reading: The Book of Why by Judea Pearl 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-01 17:57:26 &#43;0930">Mar 1, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-01 18:57:26 &#43;1030">Mar 1, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780241242643">The Book of Why</a> by Judea Pearl 📚</p>
@@ -1116,7 +1141,7 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html">Finished reading: The Self-Taught Computer Scientist by Cory Althoff 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-29 14:38:08 &#43;0930">Jan 29, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-29 15:38:08 &#43;1030">Jan 29, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781119724339">The Self-Taught Computer Scientist</a> by Cory Althoff 📚</p>
@@ -1138,7 +1163,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html">Finished reading: Living in Data by Jer Thorp 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-26 14:28:23 &#43;0930">Jan 26, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:28:23 &#43;1030">Jan 26, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781250849151">Living in Data</a> by Jer Thorp 📚</p>
@@ -1159,7 +1184,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html">Finished reading: The Checklist Manifesto by Atul Gawande 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-26 14:06:38 &#43;0930">Jan 26, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:06:38 &#43;1030">Jan 26, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781846683145">The Checklist Manifesto</a> by Atul Gawande 📚</p>
@@ -1174,7 +1199,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-our.html">Finished reading: Our Data, Ourselves by Jacqueline D. Lipton 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-our.html" class="u-url"><time class="dt-published" datetime="2023-01-26 14:00:22 &#43;0930">Jan 26, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-our.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:00:22 &#43;1030">Jan 26, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780520390508">Our Data, Ourselves</a> by Jacqueline D. Lipton 📚</p>
@@ -1201,7 +1226,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html">Currently reading: Living in Data by Jer Thorp 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-20 21:11:45 &#43;0930">Jan 20, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-20 22:11:45 &#43;1030">Jan 20, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Currently reading: <a href="https://micro.blog/books/9781250849151">Living in Data</a> by Jer Thorp 📚</p>
@@ -1215,7 +1240,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html">Finished reading: Loonshots by Safi Bahcall 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html" class="u-url"><time class="dt-published" datetime="2023-01-08 13:05:31 &#43;0930">Jan 8, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html" class="u-url"><time class="dt-published" datetime="2023-01-08 14:05:31 &#43;1030">Jan 8, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781250185976">Loonshots</a> by Safi Bahcall 📚</p>
@@ -1232,7 +1257,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html">Implicit or Explicit connection object?</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html" class="u-url"><time class="dt-published" datetime="2023-01-06 14:57:11 &#43;0930">Jan 6, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html" class="u-url"><time class="dt-published" datetime="2023-01-06 15:57:11 &#43;1030">Jan 6, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m wrapping a (stateless, hit-every-time) REST API and my design was challenged with an alternative opinion - which is great! I get to have a more serious think about design and what might work best. I have an internal function which does the actual talking to the server, e.g. <code>.get_from_API()</code> which needs to know the URL, auth key, and query parameters. I originally designed my package to fetch these from environment variables depending on the API instance (e.g. &lsquo;prod&rsquo; vs &lsquo;dev&rsquo;) and the user (their user-specific key). Individual endpoint wrappers essentially boil down to</p>
@@ -1276,7 +1301,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2023/01/04/finished-reading-neuromancer.html">Finished reading: Neuromancer by William Gibson 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/04/finished-reading-neuromancer.html" class="u-url"><time class="dt-published" datetime="2023-01-04 17:44:09 &#43;0930">Jan 4, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/04/finished-reading-neuromancer.html" class="u-url"><time class="dt-published" datetime="2023-01-04 18:44:09 &#43;1030">Jan 4, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9783608504880">Neuromancer</a> by William Gibson 📚</p>
@@ -1290,7 +1315,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/08/06/finished-reading-start.html">Finished reading: Start with Why: How Great Leaders Inspire Everyone to Take Action by Simon Sinek </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-08-06 15:39:29 &#43;0930">Aug 6, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-08-06 16:39:29 &#43;1030">Aug 6, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781591846444">Start with Why: How Great Leaders Inspire Everyone to Take Action</a> by Simon Sinek</p>
@@ -1308,7 +1333,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/08/06/finished-reading-sea.html">Finished reading: Sea of Tranquility: A novel by Emily St. John Mandel </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-sea.html" class="u-url"><time class="dt-published" datetime="2022-08-06 15:16:57 &#43;0930">Aug 6, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-sea.html" class="u-url"><time class="dt-published" datetime="2022-08-06 16:16:57 &#43;1030">Aug 6, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780593321454">Sea of Tranquility: A novel</a> by Emily St. John Mandel</p>
@@ -1323,7 +1348,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/07/31/160948.html">Finished reading: 12 Bytes: How We Got Here. Where We Might Go Next by Jeanette Winterson </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/07/31/160948.html" class="u-url"><time class="dt-published" datetime="2022-07-31 16:09:48 &#43;0930">Jul 31, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/07/31/160948.html" class="u-url"><time class="dt-published" datetime="2022-07-31 17:09:48 &#43;1030">Jul 31, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781473578258">12 Bytes: How We Got Here. Where We Might Go Next</a> by Jeanette Winterson</p>
@@ -1339,7 +1364,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/07/16/finished-reading-the.html">Finished reading: The New Childhood: Raising Kids to Thrive in a Connected World by Jordan Shapiro </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/07/16/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-16 20:15:27 &#43;0930">Jul 16, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/07/16/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-16 21:15:27 &#43;1030">Jul 16, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780316437257">The New Childhood: Raising Kids to Thrive in a Connected World</a> by Jordan Shapiro</p>
@@ -1357,7 +1382,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/07/09/finished-reading-the.html">Finished reading: The End of Eternity by Isaac Asimov</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/07/09/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-09 17:07:59 &#43;0930">Jul 9, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/07/09/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-09 18:07:59 &#43;1030">Jul 9, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9780593160060">The End of Eternity</a> by Isaac Asimov</p>
@@ -1373,7 +1398,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/29/currently-reading-start.html">Currently reading: Start With Why by Simon Sinek </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/29/currently-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-06-29 22:45:19 &#43;0930">Jun 29, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/29/currently-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-06-29 23:45:19 &#43;1030">Jun 29, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Currently reading: <a href="https://micro.blog/books/9780241958230">Start With Why</a> by Simon Sinek</p>
@@ -1402,7 +1427,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/28/finished-reading-the.html">Finished reading: The Cell by Joshua Z. Rappoport 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/28/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-28 14:16:18 &#43;0930">Jun 28, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/28/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-28 15:16:18 &#43;1030">Jun 28, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781944648978">The Cell</a> by Joshua Z. Rappoport 📚</p>
@@ -1416,7 +1441,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/11/currently-reading-the.html">Currently reading: The Cell: Discovering the Microscopic World that Determines our Health, our Consciousness, and our Future</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/11/currently-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-11 17:06:26 &#43;0930">Jun 11, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/11/currently-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-11 18:06:26 &#43;1030">Jun 11, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Currently reading: <a href="https://micro.blog/books/9781944648978">The Cell: Discovering the Microscopic World that Determines our Health, our Consciousness, and our Future</a> by Joshua Z. Rappoport</p>
@@ -1432,7 +1457,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/11/finished-reading-life.html">Finished reading: Life Unfolding: How the Human Body Creates Itself</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/11/finished-reading-life.html" class="u-url"><time class="dt-published" datetime="2022-06-11 16:49:17 &#43;0930">Jun 11, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/11/finished-reading-life.html" class="u-url"><time class="dt-published" datetime="2022-06-11 17:49:17 &#43;1030">Jun 11, 2022</time></a>
 
 		<div class="e-content">
 			 <p><a href="https://micro.blog/books/9780199673537">Life Unfolding: How the Human Body Creates Itself</a> by Jamie A. Davies</p>
@@ -1449,7 +1474,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/11/163214.html">Finished reading: Life from an RNA World: The Ancestor Within</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/11/163214.html" class="u-url"><time class="dt-published" datetime="2022-06-11 16:48:07 &#43;0930">Jun 11, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/11/163214.html" class="u-url"><time class="dt-published" datetime="2022-06-11 17:48:07 &#43;1030">Jun 11, 2022</time></a>
 
 		<div class="e-content">
 			 <p>(backlog from March 2022)</p>
@@ -1464,7 +1489,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/04/07/interpolation-animation-in.html">Interpolation animation in Julia</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/04/07/interpolation-animation-in.html" class="u-url"><time class="dt-published" datetime="2022-04-07 21:07:00 &#43;0930">Apr 7, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/04/07/interpolation-animation-in.html" class="u-url"><time class="dt-published" datetime="2022-04-07 22:07:00 &#43;1030">Apr 7, 2022</time></a>
 
 		<div class="e-content">
 			 <p>I <em>love</em> small projects for helping me learn, especially programming. I&rsquo;m still learning Julia, and have found myself wanting more &ldquo;little silly things&rdquo; I can digest and learn from. A lot of the projects I see in Julia are big mathematical models, and I&rsquo;m just not ready to dive that deep yet.</p>
@@ -1539,7 +1564,7 @@ gif(anim, fps = 24)
 			<h1><a href="https://jcarroll.xyz/2022/03/25/r-challenge-contour.html">R challenge - contour in a matrix</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/03/25/r-challenge-contour.html" class="u-url"><time class="dt-published" datetime="2022-03-25 22:02:00 &#43;0930">Mar 25, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/03/25/r-challenge-contour.html" class="u-url"><time class="dt-published" datetime="2022-03-25 23:02:00 &#43;1030">Mar 25, 2022</time></a>
 
 		<div class="e-content">
 			 <p>As part of what will hopefully become a larger post, I&rsquo;m interested in finding an R way to achieve the following: given an <code>n x n</code> matrix of zeroes with a single non-zero element of some value <code>v</code>, fill the surrounding entries such that each other element is at most one less than those surrounding it (up or down). For example, with an <code>8x8</code> matrix with a value of <code>5</code> at <code>c(5, 5)</code>, the result would be</p>
@@ -1579,7 +1604,7 @@ outer(1:n, 1:n, function(x, y) pmax(vv - abs(x - vx) - abs(y - vy), 0))
 			<h1><a href="https://jcarroll.xyz/2022/03/20/rowwise-optimizations-in.html">ByRow optimizations in Julia</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/03/20/rowwise-optimizations-in.html" class="u-url"><time class="dt-published" datetime="2022-03-20 13:11:00 &#43;0930">Mar 20, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/03/20/rowwise-optimizations-in.html" class="u-url"><time class="dt-published" datetime="2022-03-20 14:11:00 &#43;1030">Mar 20, 2022</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m still fairly new to Julia, even though I&rsquo;ve been trying to learn it for a few years. It&rsquo;s <em>extremely</em> powerful (fast, expressive, &hellip; whatever metric you want to use) but with that comes some complexity.</p>
@@ -1625,7 +1650,7 @@ microbenchmark::microbenchmark(
 			<h1><a href="https://jcarroll.xyz/2022/03/20/first-post-on.html">First post on jcarroll.xyz</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/03/20/first-post-on.html" class="u-url"><time class="dt-published" datetime="2022-03-20 11:28:39 &#43;0930">Mar 20, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/03/20/first-post-on.html" class="u-url"><time class="dt-published" datetime="2022-03-20 12:28:39 &#43;1030">Mar 20, 2022</time></a>
 
 		<div class="e-content">
 			 <p>I like blogging, but in the spirit of lowering the resistance to getting posts out, I&rsquo;ve started a micro blog <a href="https://jcarroll.xyz">jcarroll.xyz</a> where I&rsquo;ll capture shorter, less polished pieces and random thoughts / snippets.</p>
