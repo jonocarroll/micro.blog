@@ -24,10 +24,170 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2026/05/21/linting-prose-around-code-with.html">Linting prose around code with vale</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2026/05/21/linting-prose-around-code-with.html" class="u-url"><time class="dt-published" datetime="2026-05-21 13:14:16 &#43;0930">May 21, 2026</time></a>
+
+		<div class="e-content">
+			 <p>You may be familiar with the idea of linting for code, e.g. via <a href="https://lintr.r-lib.org/">{lintr} in R</a> which &ldquo;checks for adherence to a given style, identifying syntax errors and possible semantic issues.&rdquo; It&rsquo;s super helpful both for ensuring that your code meets your standards, but also when working in a team; no more arguing over nits in PRs about code style — it can be checked against your style guide rules automatically and enforced with tools like <a href="https://github.com/r-lib/styler">{styler}</a>. For Python the popular tool is <a href="https://docs.astral.sh/ruff/">ruff</a> which handles both the linting and formatting.</p>
+<p>What these tools don&rsquo;t do, though, is lint the prose — the text between the code blocks that explains your process. In order to do that, a tool needs to <em>ignore</em> the code and focus on the writing (because as much as Pythonistas say it &ldquo;reads like English&rdquo;, it&rsquo;s not). An open source tool, vale, handles this task and integrates smoothly with many platforms.</p>
+<p><img src="https://cdn.uploads.micro.blog/64109/2026/vale.png" alt=""></p>
+<p>I first heard about <a href="https://vale.sh/">vale</a> at Everything Open 2025 (formerly known as Linux Conf). I attended a genuinely enjoyable <a href="https://github.com/alecthegeek/vale-tutorial">workshop</a> run by <a href="https://alecthegeek.tech/">Alec Clews</a> a.k.a. <a href="https://mstdn.social/@alecthegeek">alecthegeek</a> and spent a little bit of time playing around with it, but never really integrated it into my workflow.</p>
+<p>It&rsquo;s used at some big companies including <a href="https://www.datadoghq.com/blog/engineering/how-we-use-vale-to-improve-our-documentation-editing-process/">Datadog</a>.</p>
+<p>I&rsquo;m working on some blog posts this week and encountered a situation I&rsquo;d prefer to catch automatically in the future, and decided it&rsquo;s time to do this properly and integrate vale. It has LSP support, so if you&rsquo;re using VSCode it can add squiggles and hover info directly into your text. Here&rsquo;s how it looks for me:</p>
+<p><img src="https://cdn.uploads.micro.blog/64109/2026/weaselword.png" alt=""></p>
+<p>The instructions to generate the configuration file are okay, but there&rsquo;s also an <a href="https://vale.sh/generator">interactive generator</a> with some checkboxes. You can adopt one of the common style guides (Microsoft, Google, or Red Hat) and add some extra features in packages such as <code>alex</code> which checks for inconsiderate writing.</p>
+<p>There&rsquo;s a linter for spelling (I <em>do</em> run a spell check, but now it can get caught earlier); one for doubled words (&ldquo;it was the first of of May&rdquo; catches the double &ldquo;of&rdquo;); and maybe you&rsquo;d be up the creek without the <a href="https://github.com/vale-cli/write-good/blob/master/write-good/Cliches.yml">cliché checker</a>.</p>
+<p><img src="https://cdn.uploads.micro.blog/64109/2026/cliche.png" alt=""></p>
+<p>I added a lot of checks (since they&rsquo;re not gating my workflow, just informing it) and it does highlight dozens of potential things to consider. It&rsquo;s possible to turn these off individually if they get too noisy and I don&rsquo;t need the check, e.g. with</p>
+<pre tabindex="0"><code>Google.OxfordComma = NO
+</code></pre><p>in the config.</p>
+<p>Some additions not rolled in from the packages that I wanted for my own work include:</p>
+<h2 id="linting-rmd-files">Linting .Rmd Files</h2>
+<p>Since I use .Rmd (R markdown) for my blog posts I wanted vale to process these files. It checks extensions and can do different things for different files. It&rsquo;s also markdown-aware, so it knows to skip over code blocks when checking prose. That&rsquo;s limited to .md files, though, so I needed to add to my config</p>
+<pre tabindex="0"><code>[formats]
+Rmd = md
+</code></pre><p>to specifically treat .Rmd as if it was plain .md (which it nearly is) otherwise I get a whole pile of warnings about the parentheses around function arguments (or maybe I should just use Haskell more, which uses whitespace for function application).</p>
+<h2 id="sentence-length">Sentence Length</h2>
+<p>The <code>Readability</code> package does some processing to determine a score based on the writing style, but I wanted to specifically check that my individual sentences weren&rsquo;t too long — I have a tendency to ramble sometimes. I added that as a custom style</p>
+<pre tabindex="0"><code># styles/local/SentenceLength.yml
+extends: occurrence
+message: &quot;Try to keep sentences short (&lt; 40 words).&quot;
+scope: sentence
+level: suggestion
+max: 40
+token: \b(\w+)\b
+</code></pre><p>so now I get a suggestion if I use more than 40 words in a sentence along with the built-in checks for &lsquo;overly wordy&rsquo; usage</p>
+<p><img src="https://cdn.uploads.micro.blog/64109/2026/wordy.png" alt=""></p>
+<h2 id="pronouns">Pronouns</h2>
+<p>The Google rules do have something for pronouns, but it looks for uses of unnecessary mixed gender &lsquo;she/he&rsquo; preferring &lsquo;they&rsquo;. I wanted one for identifying uses of just &lsquo;she&rsquo; and &lsquo;he&rsquo; (and related) in isolation to remind me to either confirm pronouns or use &lsquo;they&rsquo;. I added</p>
+<pre tabindex="0"><code># styles/local/GenderPronouns.yml
+extends: existence
+message: &quot;Consider whether '%s' should be 'they' or rephrased.&quot;
+level: warning
+ignorecase: true
+nonword: false
+tokens:
+  - \bhe\b
+  - \bshe\b
+  - \bhim\b
+  - \bher\b
+  - \bhis\b
+  - \bhers\b
+</code></pre><p>and now this gets flagged.</p>
+<hr>
+<p>As well as using this within VSCode I can call <code>vale</code> directly from the command line and get the list of issues. It even works with <code>stdin</code> if you tell it what format to assume, reporting the text that is flagged, and which rule it violates</p>
+<pre tabindex="0"><code>$ echo &quot;I found it cool when he did did that.&quot; | vale --ext=.md
+
+ stdin.md
+ 1:22  warning  Consider whether 'he' should be 'they' or rephrased.  local.GenderPronouns
+ 1:25  error    'did' is repeated!                                    Vale.Repetition
+ 1:25  warning  'did' is repeated!                                    write-good.Illusions
+
+✖ 1 error, 2 warnings and 0 suggestions in stdin.
+</code></pre><p>Here&rsquo;s hoping it helps to improve my writing. I&rsquo;m already feeling more conscious of my word choices.</p>
+<h2 id="the-bigger-picture">The Bigger Picture</h2>
+<p>The bigger question I&rsquo;m faced with is about AI and my writing. I&rsquo;ve never had AI generate my prose for any of my posts (I&rsquo;ve been deliberately sprinkling in emdashes out of spite ever since I figured out how to type them on my Mac&hellip; here&rsquo;s a few more — — —) and doubt I&rsquo;ll ever feel comfortable doing so. I <em>do</em> ask an agent to <em>review</em> what I&rsquo;ve written for grammar, consistency, accuracy (as best as it can tell) and readability, and it&rsquo;s caught things I&rsquo;ve overlooked for sure. Tools like vale remind me that there <em>are</em> ways to do some of this that doesn&rsquo;t need to chew through tokens.</p>
+<p>I get annoyed when I see people demonstrating spinning up an agent to call a tool to find out what the weather forecast is today in their city. Maybe it&rsquo;s just that it&rsquo;s a &lsquo;simple&rsquo; demonstration, but it&rsquo;s a problem for which there <em>is</em> a human-facing tool ready to be used — you can go to your favourite website and check for yourself.</p>
+<p>As the people who <em>build</em> some of the tools, I do worry that we&rsquo;re avoiding solving some problems just so that we can use AI. I&rsquo;ve seen projects spinning their wheels trying to get AI to give the &lsquo;right&rsquo; answer to a problem that&rsquo;s deterministic; they know how the data needs to flow from where it is, how to transform it, and what the result should look like, but insist on repeatedly getting an agent to do the work rather than coding up the transformation.</p>
+<p>For my own work, I think every time an agent gives me some feedback about a pattern I&rsquo;m violating, I&rsquo;ll be looking to include a linting rule for it so that I just don&rsquo;t make the same mistakes over and over. This isn&rsquo;t useful for 100% of my writing — I do leverage the Grammarly extension in my browser to catch typos in emails and forms and I&rsquo;m not going to drop into a markdown document to edit <em>everything</em> I do, but tools like this are fantastic for integrating into a proper, thoughtful workflow.</p>
+<p>Do you use vale? Specifically for R users (or, I suppose, any other language + prose users) are there some good rules I should add? You can find me on <a href="https://fosstodon.org/@jonocarroll">Mastodon</a> at <a href="https://fosstodon.org/@jonocarroll">https://fosstodon.org/@jonocarroll</a> or via my main blog <a href="https://jcarroll.com.au">https://jcarroll.com.au</a>.</p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
+			<h1><a href="https://jcarroll.xyz/2025/12/30/books-i-read-in.html">Books I Read in 2025</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2025/12/30/books-i-read-in.html" class="u-url"><time class="dt-published" datetime="2025-12-30 11:06:30 &#43;0930">Dec 30, 2025</time></a>
+
+		<div class="e-content">
+			 <p>Customary for the end of a year, here&rsquo;s the list of books I finished reading in 2025.</p>
+<h3 id="junk-dna-nessa-carey--">Junk DNA (Nessa Carey) ⭐⭐⭐⭐ ⭐</h3>
+<p>I started this late last year but finished this January so it&rsquo;s on this list. I loved this and learned a lot from it, most of which I&rsquo;m sure I won&rsquo;t remember after some time, but I took copious notes and it spawned countless new questions for me to research.</p>
+<p>Great for any bioinformatics or genomics folks - lots of deep details.</p>
+<h3 id="the-catalyst-thomas-cech-">The Catalyst (Thomas Cech) ⭐⭐⭐⭐</h3>
+<p>Also a carryover from the end of last year, continuing the same theme as the above book. Lots of great detail about how RNA works and where it came from in evolutionary terms.</p>
+<h3 id="higher-sobriety-jill-stark-">Higher Sobriety (Jill Stark) ⭐⭐⭐</h3>
+<p>I&rsquo;ve been drinking a lot less alcohol lately so I figured I&rsquo;d see how this one resonated - it certainly does, but it&rsquo;s an odd mix of research and journaling from an upper-middle class writer who has a very specific lifestyle. I&rsquo;m not a 30-something party girl in a big city, so some of the complaints were lost on me. Has a whiff of &lsquo;I did a thing and got a book deal out of it, now I&rsquo;m a celebrity&rsquo; but good on them.</p>
+<h3 id="uptime-laura-mae-martin-">Uptime (Laura Mae Martin) ⭐⭐⭐</h3>
+<p>This was recommended as a productivity helper. There&rsquo;s some good tips in there, but feels very listicle.</p>
+<h3 id="four-thousand-weeks-oliver-burkeman-">Four Thousand Weeks (Oliver Burkeman) ⭐⭐⭐⭐</h3>
+<p>A very different take on the productivity advice of the previous book on this list; not about fitting more in, but about making the best use of the little time we have. On the classic &lsquo;rocks in a jar, fill the gaps with sand&rsquo; analogy I liked the quote</p>
+<blockquote>
+<p>The real problem of time management today, though, isn&rsquo;t that we&rsquo;re bad at prioritising the big rocks. It&rsquo;s that there are too many rocks - and most of them are never making it anywhere near that jar.</p>
+</blockquote>
+<h3 id="the-twelve-monotasks-thatcher-wine-">The Twelve Monotasks (Thatcher Wine) ⭐⭐⭐</h3>
+<p>I am on board with the idea that multitasking is just doing several things at once, most likely poorly. The idea of this book is to identify things that should be done individually. Not terrible, but probably just an extended blog post.</p>
+<h3 id="after-world-debbie-urbanski-">After World (Debbie Urbanski) ⭐⭐⭐⭐⭐</h3>
+<p>Finally some fiction. I thoroughly enjoyed this one. The basic plot is that AI has taken over the world and (as tends to be the case in AI sci-fi) decided that humans are the problem. This explores a scenario where humanity is on the way out and can&rsquo;t do anything about it. Lots of human nature mixed in with some AI techy stuff. Highly recommend.</p>
+<h3 id="scythe-neal-shusterman-">Scythe (Neal Shusterman) ⭐⭐⭐⭐⭐</h3>
+<p>This was recommended to me and I was hooked on the first book of the trilogy, finishing this one in just a few evenings. Also an all-in AI world, but one in which all of humanities problems (including death) are solved - so how does the world deal with an ever-increasing population? Thought-provoking in terms of human nature and our relationship to death. Highly recommend.</p>
+<h3 id="all-systems-red-martha-wells-">All Systems Red (Martha Wells) ⭐⭐⭐⭐</h3>
+<p>I&rsquo;d read this one a while ago but with the Murderbot TV series being released I figured I&rsquo;d give it another read. Of course, all the physical copies were out with a long wait from the library (the TV series was popular, I guess) I opted for the audiobook. I was delighted that this was a &lsquo;GraphicAudio&rsquo; which has a whole cast and sound effects - essentially a radio play - and it was wonderful to listen through. It seems that the TV series mostly kept in line with this book, with some subtle changes. Highly recommend.</p>
+<h3 id="the-atrocity-archives-charles-stross-">The Atrocity Archives (Charles Stross) ⭐⭐⭐</h3>
+<p>Recommended to me by the same person who recommended Scythe and this one wasn&rsquo;t so much up my alley. The techno-babble was a little forced but at least well-informed. The idea that &ldquo;magic is just maths&rdquo; is cool and integrates nicely into the story, but the whole thing wrapped up like the author was running out of pages to write on. I probably won&rsquo;t rush to the rest of the Laundry Files series.</p>
+<h3 id="the-ministry-of-time-kaliane-bradley-">The Ministry of Time (Kaliane Bradley) ⭐⭐⭐⭐</h3>
+<p>I&rsquo;m not usually one for historical novels but this has just the right amount of timey-wimey to it so that it kept my attention. The twists and turns took an awfully long time to be introduced, but they were rewarding once they did. I later heard an interview with the author and they were inspired by a book I later read, the connection of which didn&rsquo;t occur to me at the time.</p>
+<h3 id="artificial-condition-martha-wells-">Artificial Condition (Martha Wells) ⭐⭐⭐</h3>
+<p>Following on from All Systems Red, I didn&rsquo;t enjoy this one as much as the first, possibly due to the plot. It was also an audiobook, but had much less of a &lsquo;radio play&rsquo; feel to it.</p>
+<h3 id="thunderhead-neal-shusterman-">Thunderhead (Neal Shusterman) ⭐⭐⭐⭐</h3>
+<p>Following on from Scythe, this continues to be a great series. Focussing more on the &lsquo;system&rsquo; in place it&rsquo;s easy to read parts as criticisms of how the world is now</p>
+<blockquote>
+<p>To facilitate that, I had to to create a system worthy of loathing. In reality, there is no actual need for people to take a number, or to wait for long periods of time. There isn&rsquo;t even a need for an intake agent. It&rsquo;s all designed to make unsavories feel as if the system is wasting their time. The illusion of inefficiency serves the specific purpose of creating annoyance around which unsavories can bond.</p>
+</blockquote>
+<p>If this was Australian, that service would absolutely be named as a pun on Centrelink.</p>
+<h3 id="coders-clive-thompson-">Coders (Clive Thompson) ⭐⭐⭐</h3>
+<p>I&rsquo;ve followed the author&rsquo;s work on podcasts and heard good things about this book. The first half is fantastic - stories about how some big companies (e.g. Instagram) started from actual hard work and really small apps designed to do something completely different. The second half was about biases in hiring which - while horrible and absolutely an issue - didn&rsquo;t make for great reading.</p>
+<h3 id="die-with-zero-bill-perkins-">Die with Zero (Bill Perkins) ⭐⭐⭐⭐</h3>
+<p>An eye-opening exposition of how we&rsquo;re taught to do savings wrong. &ldquo;Spend the money at the time it maximises what it can do for you&rdquo; is my takeaway. If you plan to give money to your children, do so when they&rsquo;re about 30 - the point in their lives where it is the most helpful and they can be trusted with it, not as an inheritance when they&rsquo;re 60 and have their own money. The crossing curve of increasing wealth and decreasing health makes me want to do more to make the most of what I do have while I can still use it. I read a bunch of counterargument articles to this and half of them didn&rsquo;t seem to read the book. Definitely worth a read; take what you like from it.</p>
+<h3 id="the-three-body-problem-cixin-liu-">The Three Body Problem (Cixin Liu) ⭐⭐⭐⭐</h3>
+<p>I watched the TV series and enjoyed it, and some friends recommended the books. I say watch the TV series. This book was very dry, with a lot more detail about the cultural revolution aspects which don&rsquo;t take up too much time in the show. The book does go into a lot more detail about the antagonists, though, which was great.</p>
+<h3 id="slaughterhouse-five-kurt-vonnegut-jr-">Slaughterhouse Five (Kurt Vonnegut Jr.) ⭐⭐⭐</h3>
+<p>Time for a classic, I guess. I read Player Piano in 2023 and while it was okay, I wasn&rsquo;t crazy about it. This one is a lot better, but is a strange mix of a war story book and time travel. Apparently an inspiration for The Ministry of Time which I can see in retrospect. Not my favourite, but interesting enough.</p>
+<h3 id="the-anthropocene-reviewed-john-green-">The Anthropocene Reviewed (John Green) ⭐⭐⭐⭐</h3>
+<p>I got the audiobook for this one, and it&rsquo;s read by the author himself. I remember enjoying John&rsquo;s videos and later his brother Hank&rsquo;s, so the voice was nice and familiar. LOTS of interesting historical tidbits. One of the most interesting to me - the daughter of the first human penicillin subject is (was, in the 2020s) still alive; penicillin is very new.</p>
+<p>&ldquo;I give &lsquo;The Anthropocene Reviewed&rsquo; 4 stars&rdquo;</p>
+<h3 id="the-rationalists-guide-to-the-galaxy-tom-chivers-">The Rationalist&rsquo;s Guide to the Galaxy (Tom Chivers) ⭐⭐⭐⭐</h3>
+<p>Picked up randomly at the library, I wasn&rsquo;t aware of the massive background of &lsquo;The Rationalists&rsquo; as a movement. I knew of the site LessWrong but not of the connection to this movement. Lots of interesting discussions on utilitarianism and altruism that I hadn&rsquo;t encountered before. The longer view is about AI and how bad &ldquo;real&rdquo; AI could be for us. This lead me down a rabbit hole of &lsquo;The Sequences&rsquo; which will take years to get through, but then also the newer &lsquo;If Anyone Builds it, Everyone Dies&rsquo; which I&rsquo;m only just getting to now. I&rsquo;m not 100% sold on the fears or the idea that &ldquo;computer scientists determine that computer science is the solution to all problems&rdquo; irony. The argument for &ldquo;maximising the benefits integrated over time&rdquo; being best served by making AI as early as possible seems in conflict with what seems better for more people - &ldquo;minimise the number of people suffering right now; some of them will make great things, and some will make more people who will&rdquo;.</p>
+<h3 id="autonomous-anna-lee-newitz-">Autonomous (Anna Lee Newitz) ⭐⭐⭐⭐</h3>
+<p>Fiction again - this has a Murderbot vibe to it, but explores more about &lsquo;self&rsquo; for a thinking robot. Some interesting tech thrown in around the story.</p>
+<h3 id="everything-is-tuberculosis-john-green-">Everything is Tuberculosis (John Green) ⭐⭐⭐</h3>
+<p>Following from The Anthropocene Reviewed I got the physical copy of this one. I wasn&rsquo;t aware of the massive history of TB (a.k.a. consumption) but the list of famous victims is incredible.  Lots of interesting tidbits in this one, but as a book it didn&rsquo;t really come together so well for me.</p>
+<h3 id="ultralearning-scott-h-young-">Ultralearning (Scott H. Young) ⭐⭐⭐</h3>
+<p>As heard about on a podcast, I got the audiobook for this one. Lots of similar ideas to Rest (Alex Soojong-Kim Pang) which I read last year in terms of letting your brain do the background thinking. Some good tips for learning more, but probably best suited to someone who necessarily needs to learn a lot - I&rsquo;m happy to learn at a slow pace.</p>
+<h3 id="vaccine-nation-raina-macintyre-">Vaccine Nation (Raina MacIntyre) ⭐⭐</h3>
+<p>A good review of some vaccine history, with some possible inconsistencies for pop-sci audience (&ldquo;DNA of the virus&rdquo; - aren&rsquo;t most viruses RNA based?). One particularly disturbing factoid was the &lsquo;number needed to vaccinate to prevent 1 hospitalisation&rsquo; - it&rsquo;s apparently 1852 for influenza in children. While it&rsquo;s fantastic that Australia has the rate it does, it&rsquo;s nowhere near high enough. For COVID-19 in children, apparently that number needed is too high to recommend boosters for children, i.e. a cost-saving exercise. Overall it had a good start, but got a bit repetitive in places, possibly poor editing.</p>
+<h3 id="prove-it-elizabeth-finkel-">Prove It (Elizabeth Finkel) ⭐⭐⭐</h3>
+<p>I recognised the author&rsquo;s name - Elizabeth was the editor for The Best Australian Science Writing 2012 in which I have a chapter. This goes through a lot of interesting stories about the origins of the scientific method, and connections between some famous figures from history.</p>
+<h3 id="the-andromeda-strain-michael-crichton-">The Andromeda Strain (Michael Crichton) ⭐⭐⭐</h3>
+<p>I&rsquo;d heard good things and I hadn&rsquo;t read it before. The story itself tiptoes around the main plot point for most of the book then wraps up as if the author ran out of ink. A bit disappointing, but reasonably well written overall.</p>
+<h3 id="how-to-do-nothing-jenny-odell-">How to Do Nothing (Jenny Odell) ⭐⭐⭐</h3>
+<p>Some interesting points regarding rejecting the attention economy, but overall a bit meh. Contained some good recommendations for other books now on my list, though.</p>
+<h3 id="indistractable-nir-eyal-">Indistractable (Nir Eyal) ⭐⭐⭐⭐</h3>
+<p>A similar theme to the previous book, also about attention capital. Some great quotes in there, e.g. on the invention of smartphones &ldquo;when you invent the ship, you also invent the shipwreck&rdquo; - Paul Virilio. Worth a read if you think your mental energy/willpower is limited; it doesn&rsquo;t have to be. I skipped the last couple of chapters which were getting repetitive.</p>
+<h3 id="inventing-the-future-nick-srnick-alex-williams-">Inventing the Future (Nick Srnick, Alex Williams) ⭐⭐</h3>
+<p>Recommended by a friend as an alternative to the doom and gloom of post-AI books, I wasn&rsquo;t aware that I was in for 80 pages of political history before getting to the point, but I learned a LOT that I hadn&rsquo;t previously encountered about neoliberalism. Discusses what &ldquo;work&rdquo; should look like in the future, so strong recommendation to anyone who enjoyed David Graeber&rsquo;s writings. Plenty of political discussion throughout (&ldquo;Under negative freedom, the rich and the poor are considered equally free, despite the obvious differences in their capacities to act&rdquo;) but written in an extremely academic tone (it felt like the co-author was a thesaurus). Worth the read if you have a lot of time and are interested in the politics that might come from a world in which computers can do a lot more for us.</p>
+<h3 id="hidden-potential-adam-grant-">Hidden Potential (Adam Grant) ⭐⭐</h3>
+<p>Similar to Ultralearning and to some degree the previous book (in terms of understanding where &lsquo;work ethic&rsquo; comes from). Also interesting to see the definition of &lsquo;soft skills&rsquo; explained in a military context where it supposedly originated; the &lsquo;hard&rsquo; referred to things made of metal, i.e. guns and tanks, so in that sense finance is a &lsquo;soft skill&rsquo;. The key takeaway was that discomfort is essential to learning - if it&rsquo;s too easy you&rsquo;re not learning, and practice before mastery is uncomfortable. Some great points throughout, but I skipped the last chapter.</p>
+<h3 id="fluent-forever-gabriel-wyner-">Fluent Forever (Gabriel Wyner) ⭐⭐⭐</h3>
+<p>As I continue to learn Japanese I&rsquo;m now meta-learning about how to do that. This book has lots of links to resources (although URLs are capitalised a lot and that feels strange) including the author&rsquo;s own for-money app. I signed up and have been getting relentless emails about discounts ever since. Nonetheless, some good tips on what makes language learning actually work well. I skipped all the toolbox sections at the end as I have a SRS system I&rsquo;m happy with (Wanikani).</p>
+<hr>
+<p>Heading into the new year I&rsquo;ve started &lsquo;If Anyone Builds it, Everyone Dies&rsquo; (Eliezer Yudkowsky, Nate Soares) and &lsquo;Short Stories in Japanese for Intermediate Learners&rsquo; (Olly Richards). Feel free to send me your recommendations (preferably also <em>why</em> you liked it).</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2025/10/07/aaaaand-theyre-off.html">Aaaaand... they&#39;re off!</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2025/10/07/aaaaand-theyre-off.html" class="u-url"><time class="dt-published" datetime="2025-10-07 16:01:00 &#43;1030">Oct 7, 2025</time></a>
+		<a href="https://jcarroll.xyz/2025/10/07/aaaaand-theyre-off.html" class="u-url"><time class="dt-published" datetime="2025-10-07 15:01:00 &#43;0930">Oct 7, 2025</time></a>
 
 		<div class="e-content">
 			 <p><a href="https://fosstodon.org/@shikokuchuo/115326795142325660">This toot</a> from Charlie Gao about the new release of <a href="https://mirai.r-lib.org/">{mirai}</a> (R&rsquo;s newest async evaluation framework) mentions the new function <a href="https://mirai.r-lib.org/reference/race_mirai.html"><code>race_mirai()</code></a> which</p>
@@ -36,9 +196,9 @@
 </blockquote>
 <p>This caught my attention, partly because I&rsquo;ve been thinking about &ldquo;alternate pathway&rdquo; designs recently, albeit in a very different context.</p>
 <p>I saw the <a href="https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/">latest paper from Thinking Machines Lab</a> titled &lsquo;Defeating Nondeterminism in LLM Inference&rsquo; and the header &ldquo;image&rdquo; (actually a complex svg, not a rasterised image) for that shows the result of an LLM annotated with alternatives which were not selected (but might have been with higher temperature) and their &lsquo;score&rsquo; for how likely they were to be selected (presumably)</p>
-<p><img src="https://raw.githubusercontent.com/jonocarroll/micro.blog/refs/heads/main/uploads/2025/thinkingmachines.jpg" width="600px"><br></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
 <p>This reminded me of Tufte&rsquo;s graphical sentences, apparently in his book &lsquo;Seeing with Fresh Eyes&rsquo; but which I could only find <a href="https://techno-sapien.com/blog/tufte-redesigns-the-sentence">one blog post</a> referencing</p>
-<p><img src="https://raw.githubusercontent.com/jonocarroll/micro.blog/refs/heads/main/uploads/2025/graphicalsentence.jpg" width="600px"><br></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
 <p>I think it&rsquo;s an interesting idea, and I <a href="https://www.linkedin.com/posts/carrolljonathan_ive-seen-this-new-post-from-thinking-machines-activity-7372447925588832256-Atjy">posted on LinkedIn as such</a> but didn&rsquo;t get much of a response about it.</p>
 <p>Sometimes there are multiple options that fit at a given point, and we need to choose one based on some criteria. In the LLM space it&rsquo;s &ldquo;what word best looks like a good answer?&rdquo;, but in programming we sometimes need to ask &ldquo;what algorithm has the best performance for this calculation?&rdquo;</p>
 <p>Back to {mirai} - the example given was two functions <code>m1()</code> and <code>m2()</code> which sleep for 0.2s and 0.1s, respectively. Passing a list of these to <code>race_mirai()</code> and wrapped with some timing code, it&rsquo;s clear that each time it&rsquo;s run, the value is returned after the 0.1s evaluation has taken place.</p>
@@ -153,7 +313,7 @@ s <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">race_sort
 			<h1><a href="https://jcarroll.xyz/2025/08/14/nth-roots-of-unity.html">Nth roots of unity</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2025/08/14/nth-roots-of-unity.html" class="u-url"><time class="dt-published" datetime="2025-08-14 14:29:42 &#43;1030">Aug 14, 2025</time></a>
+		<a href="https://jcarroll.xyz/2025/08/14/nth-roots-of-unity.html" class="u-url"><time class="dt-published" datetime="2025-08-14 13:29:42 &#43;0930">Aug 14, 2025</time></a>
 
 		<div class="e-content">
 			 <p>Justus Perlwitz has a nice interactive post which calculates (and plots) the nth roots of unity: <a href="https://www.justus.pw/garden/nth-roots.html">www.justus.pw/garden/nt&hellip;</a> and it made me want to do something similar in R which is well known for its statistical capabilities.</p>
@@ -234,7 +394,7 @@ nroots(<span style="color:#ae81ff">5</span>)
 			<h1><a href="https://jcarroll.xyz/2024/11/15/quick-note-functions.html">Quick Note: Functions in Haskell</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/11/15/quick-note-functions.html" class="u-url"><time class="dt-published" datetime="2024-11-15 12:17:12 &#43;1030">Nov 15, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/11/15/quick-note-functions.html" class="u-url"><time class="dt-published" datetime="2024-11-15 11:17:12 &#43;0930">Nov 15, 2024</time></a>
 
 		<div class="e-content">
 			 <p>Another throwaway comment that sort of blew my mind recently; I am making my way through <a href="https://www.youtube.com/watch?v=nlTJU8wLo7E&amp;list=PLu6SHDdOToSe7ZOw-mR55j2GEjkNTQgrd">Haskell For Dilettantes</a> and I&rsquo;m very much enjoying the lectures and exercises. A sidebar video (Part 4) explains that &lsquo;space&rsquo; performs function application. The example given is</p>
@@ -259,7 +419,7 @@ nroots(<span style="color:#ae81ff">5</span>)
 			<h1><a href="https://jcarroll.xyz/2024/09/18/bringing-type-checking.html">Bringing type checking to R</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/09/18/bringing-type-checking.html" class="u-url"><time class="dt-published" datetime="2024-09-18 10:34:41 &#43;1030">Sep 18, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/09/18/bringing-type-checking.html" class="u-url"><time class="dt-published" datetime="2024-09-18 09:34:41 &#43;0930">Sep 18, 2024</time></a>
 
 		<div class="e-content">
 			 <p>Another &lsquo;toot that became too long&rsquo; post, this time about dynamically vs strictly typed languages. <a href="https://vapour.run/">Vapour</a> is a new language that just dropped that has strict typing and transpiles to R (dynamic types) which means developers can write and refactor code with all the benefits of a type-checker and still end up with plain R code. I love the idea and have been playing around with it pretty much since I heard about it.</p>
@@ -280,7 +440,7 @@ nroots(<span style="color:#ae81ff">5</span>)
 			<h1><a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html">Leap Years with GCD in various languages</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html" class="u-url"><time class="dt-published" datetime="2024-08-19 19:50:21 &#43;1030">Aug 19, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/08/19/leap-years-with.html" class="u-url"><time class="dt-published" datetime="2024-08-19 18:50:21 &#43;0930">Aug 19, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I saw <a href="https://fpilluminated.com/allSlides/238">this deck</a> via <a href="https://discu.eu/weekly/haskell/2024/33/">Haskell Weekly Recap</a> which noted an interesting property:</p>
@@ -317,7 +477,7 @@ nroots(<span style="color:#ae81ff">5</span>)
 			<h1><a href="https://jcarroll.xyz/2024/08/04/r-function-call.html">R function call overhead</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/08/04/r-function-call.html" class="u-url"><time class="dt-published" datetime="2024-08-04 18:01:30 &#43;1030">Aug 4, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/08/04/r-function-call.html" class="u-url"><time class="dt-published" datetime="2024-08-04 17:01:30 &#43;0930">Aug 4, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m entirely perplexed by this - I was exploring an idea I saw discussed in a blog post (that will have to wait for now - I&rsquo;ll come back to it) and found some interesting behaviour I don&rsquo;t understand.</p>
@@ -350,7 +510,7 @@ bm <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::<
   iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
 )
 <span style="color:#a6e22e">plot</span>(bm)
-</code></pre></div><p><img src="https://i.imgur.com/B5jRwTO.png" alt=""><!-- --></p>
+</code></pre></div><p><img src="https://i.imgur.com/B5jRwTO.png" alt=""><!-- raw HTML omitted --></p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bm[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
 <span style="color:#75715e">#&gt; # A tibble: 4 × 6</span>
 <span style="color:#75715e">#&gt;   expression      min   median `itr/sec` mem_alloc `gc/sec`</span>
@@ -373,7 +533,7 @@ bm5 <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::
   iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
 )
 <span style="color:#a6e22e">plot</span>(bm5)
-</code></pre></div><p><img src="https://i.imgur.com/esmKs7U.png" alt=""><!-- --></p>
+</code></pre></div><p><img src="https://i.imgur.com/esmKs7U.png" alt=""><!-- raw HTML omitted --></p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bm5[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
 <span style="color:#75715e">#&gt; # A tibble: 4 × 6</span>
 <span style="color:#75715e">#&gt;   expression      min   median `itr/sec` mem_alloc `gc/sec`</span>
@@ -398,7 +558,7 @@ bms <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::
   iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
 )
 <span style="color:#a6e22e">plot</span>(bms)
-</code></pre></div><p><img src="https://i.imgur.com/7wWxAWp.png" alt=""><!-- --></p>
+</code></pre></div><p><img src="https://i.imgur.com/7wWxAWp.png" alt=""><!-- raw HTML omitted --></p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bms[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
 <span style="color:#75715e">#&gt; # A tibble: 3 × 6</span>
 <span style="color:#75715e">#&gt;   expression       min   median `itr/sec` mem_alloc `gc/sec`</span>
@@ -423,7 +583,7 @@ bmr <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::
   iterations <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
 )
 <span style="color:#a6e22e">plot</span>(bmr)
-</code></pre></div><p><img src="https://i.imgur.com/ElECsgG.png" alt=""><!-- --></p>
+</code></pre></div><p><img src="https://i.imgur.com/ElECsgG.png" alt=""><!-- raw HTML omitted --></p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">bmr[, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>]
 <span style="color:#75715e">#&gt; # A tibble: 4 × 6</span>
 <span style="color:#75715e">#&gt;   expression       min   median `itr/sec` mem_alloc `gc/sec`</span>
@@ -443,7 +603,7 @@ bmr <span style="color:#f92672">&lt;-</span> bench<span style="color:#f92672">::
 			<h1><a href="https://jcarroll.xyz/2024/08/01/book-review-data.html">Book review: Data Analysis with AI and R</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/08/01/book-review-data.html" class="u-url"><time class="dt-published" datetime="2024-08-01 10:22:24 &#43;1030">Aug 1, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/08/01/book-review-data.html" class="u-url"><time class="dt-published" datetime="2024-08-01 09:22:24 &#43;0930">Aug 1, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I published <a href="https://www.manning.com/books/beyond-spreadsheets-with-r">Beyond Spreadsheets with R</a> with Manning Publications partly because they approached me, but a lot because they seem to do a good job of publishing technical books and making them DRM free - if you buy a physical copy you get access to the eBooks to download (pdf, epub, &hellip;) and use as you see fit. I&rsquo;ve received free (well-known) ebooks from other large publishers that I just don&rsquo;t read because it involves installing and opening up a proprietary piece of software just to read the book, and I can&rsquo;t integrate it with any of my notetaking tools.</p>
@@ -486,7 +646,7 @@ a<span style="color:#f92672">+</span>b<span style="color:#f92672">+</span>c
 			<h1><a href="https://jcarroll.xyz/2024/06/06/enums-in-r.html">Enums in R</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/06/06/enums-in-r.html" class="u-url"><time class="dt-published" datetime="2024-06-06 12:23:02 &#43;1030">Jun 6, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/06/06/enums-in-r.html" class="u-url"><time class="dt-published" datetime="2024-06-06 11:23:02 &#43;0930">Jun 6, 2024</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m looping back to reading some of <a href="https://design.tidyverse.org/">Tidy Design Principles</a> since it hasn&rsquo;t been touched in a while (indicating some stability, at least in the short term). I jumped ahead to a <a href="https://design.tidyverse.org/boolean-strategies.html">section on enums</a> out of curiosity and pondered on them a bit more - they&rsquo;re <em>really</em> useful in Rust, maybe there&rsquo;s a good way to implement them in R.</p>
@@ -559,7 +719,7 @@ GridShape<span style="color:#f92672">@</span>Square
 			<h1><a href="https://jcarroll.xyz/2024/06/01/how-do-you.html">How do you do personal knowledge management?</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/06/01/how-do-you.html" class="u-url"><time class="dt-published" datetime="2024-06-01 15:57:26 &#43;1030">Jun 1, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/06/01/how-do-you.html" class="u-url"><time class="dt-published" datetime="2024-06-01 14:57:26 &#43;0930">Jun 1, 2024</time></a>
 
 		<div class="e-content">
 			 <p>This post is a bit of a brain dump / working-out-loud thing. The posts here on <a href="https://jcarroll.xyz">jcarroll.xyz</a> are less formal than what I put on my main blog <a href="https://jcarroll.com.au">jcarroll.com.au </a> which is more for technical articles on coding. There won&rsquo;t be any code in this post. This was built up from a series of notes captured over a couple of weeks or so, which makes for a somewhat longer, bordering on rambling post, so &hellip; sorry, I guess?</p>
@@ -580,9 +740,9 @@ GridShape<span style="color:#f92672">@</span>Square
 <p>I started capturing the blog posts I found useful/interesting - Obsidian connects up to a web clipping tool that can capture the entire content of a post and insert it as markdown into a new note. I attended a Meetup and noted some things I wanted to look into more later. I now have a note for each Meetup group linking to notes for each of the people I frequently meet. I can write the link for anything and even if the note it points to doesn&rsquo;t exist, if I ever create it the link will be made.</p>
 <p>I figured I could probably also capture all the books on my bookshelf, but I really didn&rsquo;t want to sit there and type out all the titles manually. Thankfully, these new fangled AIs are quite good at extracting them from (rotated) images. I had a lot of success with claude.ai (once I got the prompt working). I have a note containing a bullet list of all the books on my shelf, sorted into rough categories. I did the same with my vinyl albums. Fantastic! So organised! Now if I want to refer to those in my notes, it&rsquo;s easy. Plus, I can see what I do and don&rsquo;t already have.</p>
 <p>At this point I tooted on Mastodon about how much I was enjoying Obsidian</p>
-<iframe src="https://fosstodon.org/@jonocarroll/112267246150060195/embed" class="mastodon-embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script src="https://fosstodon.org/embed.js" async="async"></script>
+<!-- raw HTML omitted -->
 <p>and was pointed to a convenient plugin to pull in metadata about books/music/etc&hellip; from a database</p>
-<iframe src="https://social.lol/@amerpie/112270020807629471/embed" class="mastodon-embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script src="https://fosstodon.org/embed.js" async="async"></script>
+<!-- raw HTML omitted -->
 <p>which a) is extremely cool! b) made me stop and think about what I was actually doing with this data. Yes, I could pull in all that additional information, but would I ever use it?</p>
 <p>One of the points in Building a Second Brain was about &lsquo;data hoarders&rsquo; - people who note everything in case they&rsquo;ll ever need it, but with no plan to get any of it out again. I&rsquo;m not accusing Lou here of anything like that - a good suggestion for a plugin is most welcome - but it got me thinking about how I want to landscape my knowledge garden; do I want ornamentals (nice to look at but not productive) or fruiting plants? I&rsquo;ve since seen other people with curated vaults full of movies they&rsquo;ve seen/reviewed and all that metadata pulled in automatically, so it has a place, but not necessarily for what I want to get out of my own vault.</p>
 <p>I&rsquo;ve dealt with a similar delicate balance before - I&rsquo;m frequently tasked with annotating data (most recently of the genomic variety) such as complementing the metadata for samples from a clinical trial with metadata regarding the source subject. Where I&rsquo;ve seen this done less reliably, all of that has been shoehorned into the data of the sample itself, but in more sophisticated systems it&rsquo;s a lookup from sample to subject to create a join. Not every piece of metadata is always relevant, though - it depends on what you want to do with it. Some downstream users of the data I curate might be interested in the medical history or concomitant medications of the source subject when analysing a sample, but others may only be interested in the count method used for sequencing.</p>
@@ -614,7 +774,7 @@ GridShape<span style="color:#f92672">@</span>Square
 			<h1><a href="https://jcarroll.xyz/2024/05/06/on-content-creation.html">On content creation motivation</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/05/06/on-content-creation.html" class="u-url"><time class="dt-published" datetime="2024-05-06 10:18:06 &#43;1030">May 6, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/05/06/on-content-creation.html" class="u-url"><time class="dt-published" datetime="2024-05-06 09:18:06 &#43;0930">May 6, 2024</time></a>
 
 		<div class="e-content">
 			 <p>(this was going to be a (series of) toot(s) but it got too waaay too long)</p>
@@ -640,7 +800,7 @@ GridShape<span style="color:#f92672">@</span>Square
 			<h1><a href="https://jcarroll.xyz/2024/03/15/fuzzy-grouping.html">Fuzzy Grouping</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/03/15/fuzzy-grouping.html" class="u-url"><time class="dt-published" datetime="2024-03-15 13:51:32 &#43;1030">Mar 15, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/03/15/fuzzy-grouping.html" class="u-url"><time class="dt-published" datetime="2024-03-15 12:51:32 &#43;0930">Mar 15, 2024</time></a>
 
 		<div class="e-content">
 			 <p>A former colleague got in touch recently with a question about how one might perform the following grouping operation&hellip;</p>
@@ -744,7 +904,7 @@ meddata <span style="color:#f92672">|&gt;</span>
 			<h1><a href="https://jcarroll.xyz/2024/02/10/friends-romans-countrymen.html">Friends, Romans, Countrymen, lend me your debuggers</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2024/02/10/friends-romans-countrymen.html" class="u-url"><time class="dt-published" datetime="2024-02-10 16:57:10 &#43;1030">Feb 10, 2024</time></a>
+		<a href="https://jcarroll.xyz/2024/02/10/friends-romans-countrymen.html" class="u-url"><time class="dt-published" datetime="2024-02-10 15:57:10 &#43;0930">Feb 10, 2024</time></a>
 
 		<div class="e-content">
 			 <p>This was just going to be a short toot, but it keeps growing so I moved it over to here.</p>
@@ -781,7 +941,7 @@ x
 			<h1><a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html">Breaking down squared digits in (Dyalog) APL</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html" class="u-url"><time class="dt-published" datetime="2023-11-16 10:17:56 &#43;1030">Nov 16, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/11/16/breaking-down-squared.html" class="u-url"><time class="dt-published" datetime="2023-11-16 09:17:56 &#43;0930">Nov 16, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I love small challenges as a way to learn a language. I spotted <a href="https://mastodon.social/@krz/111415569841445388">this one</a> in the #rstats hashtag on Mastodon</p>
@@ -862,7 +1022,7 @@ x
 			<h1><a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html">Breaking down fizzbuzz in (Dyalog) APL</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html" class="u-url"><time class="dt-published" datetime="2023-11-10 22:19:05 &#43;1030">Nov 10, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/11/10/breaking-down-fizzbuzz.html" class="u-url"><time class="dt-published" datetime="2023-11-10 21:19:05 &#43;0930">Nov 10, 2023</time></a>
 
 		<div class="e-content">
 			 <p>The one-liner solution: <code>{∊(3↑(0=3 5|⍵)∪1)/'Fizz' 'Buzz' ⍵}¨⍳20</code></p>
@@ -906,7 +1066,7 @@ should be &ldquo;fizz&rdquo; <code>(1 0)</code>, &ldquo;buzz&rdquo; <code>(0 1)<
 			<h1><a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html">Filtering Vectors</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html" class="u-url"><time class="dt-published" datetime="2023-07-03 14:18:59 &#43;1030">Jul 3, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/07/03/filtering-vectors.html" class="u-url"><time class="dt-published" datetime="2023-07-03 13:18:59 &#43;0930">Jul 3, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I saw a YouTube short demonstrating how to use <code>filter()</code> in Python along the lines of</p>
@@ -967,7 +1127,7 @@ primes
 			<h1><a href="https://jcarroll.xyz/2023/06/14/around-the-web.html">Around the web 2023W24</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/06/14/around-the-web.html" class="u-url"><time class="dt-published" datetime="2023-06-16 14:20:20 &#43;1030">Jun 16, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/06/14/around-the-web.html" class="u-url"><time class="dt-published" datetime="2023-06-16 13:20:20 &#43;0930">Jun 16, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I think I&rsquo;m happy with my <a href="https://feedrabbit.com/">RSS-to-email</a> setup now but I feel like I&rsquo;m only passively reading things and can do better. I&rsquo;m going to try summarising (on this micro blog) the interesting posts I see (RSS feeds, newsletters, social feeds, general web finds) as a way to share some links, to be able to find them again later, and to reinforce what I&rsquo;m learning. This is informal, largely unstructured, largely unedited, and possibly only interesting to me, but if you don&rsquo;t like it then don&rsquo;t read it. Feel free to comment (here or elsewhere) and start a conversation on any of the topics (or anything).</p>
@@ -1115,7 +1275,7 @@ primes
 			<h1><a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html">FizzBuzz without an if</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html" class="u-url"><time class="dt-published" datetime="2023-05-12 17:11:17 &#43;1030">May 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/05/12/fizzbuzz-without-an.html" class="u-url"><time class="dt-published" datetime="2023-05-12 16:11:17 &#43;0930">May 12, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Apparently using an <code>if</code> to solve <a href="https://en.wikipedia.org/wiki/Fizz_buzz">FizzBuzz</a> is a sign that you&rsquo;re <a href="https://youtu.be/GfNBZ7awHGo?t=545">not a great programmer</a>&hellip; Well, that&rsquo;s how I would have done it :-(</p>
@@ -1148,10 +1308,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/04/12/finished-reading-bullshit.html">Finished reading: Bullshit Jobs by David Graeber 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-bullshit.html" class="u-url"><time class="dt-published" datetime="2023-04-12 11:10:58 &#43;1030">Apr 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-bullshit.html" class="u-url"><time class="dt-published" datetime="2023-04-12 10:10:58 &#43;0930">Apr 12, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780241267363/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780241267363">Bullshit Jobs</a> by David Graeber 📚</p>
 <p>I&rsquo;ll preface this with my sympathy for my colleagues and friends currently struggling to find work after corporate layoffs. This book makes their plight even worse as it details people who <em>do</em> have jobs, but don&rsquo;t believe they should as they don&rsquo;t feel they offer any benefit to society. This is the (much) expanded version of a <a href="https://www.atlasofplaces.com/essays/on-the-phenomenon-of-bullshit-jobs/">short essay</a> backed up with references and sidenotes.</p>
 <p>I&rsquo;ve puzzled for a while at the notion of aiming for &ldquo;100% employment&rdquo; both from the perspective that &ldquo;productivity should be improving with technology, so do we still <em>need</em> those jobs?&rdquo; and the more social &ldquo;is the goal really for everyone to be working more?&rdquo; This book spells out those arguments in great detail and points out that, if all was going well, we could all be working 15 hour weeks with the rest of the time left to do whatever we want.</p>
@@ -1170,10 +1330,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/04/12/finished-reading-soonish.html">Finished reading: Soonish by Kelly and Zach Weinersmith 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-soonish.html" class="u-url"><time class="dt-published" datetime="2023-04-12 10:40:51 &#43;1030">Apr 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-soonish.html" class="u-url"><time class="dt-published" datetime="2023-04-12 09:40:51 &#43;0930">Apr 12, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781846149009/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781846149009">Soonish</a> by Kelly and Zach Weinersmith 📚</p>
 <p>Another &lsquo;prominently featured on a library shelf&rsquo; find that caught my attention partly because of the authors' name - I&rsquo;ve spent many hours reading <a href="https://www.smbc-comics.com/">Saturday Morning Breakfast Cereal</a> and there was definitely a time during my PhD when reading the day&rsquo;s new comics (along with <a href="https://xkcd.com/">XKCD</a> and others) was just part of my routine.</p>
 <p>This condenses what was surely a lot of research down into digestible summaries - punctuated with humour - about how some new technologies might change the world. It&rsquo;s almost a shame that it&rsquo;s not longer; I suspect a <em>lot</em> of material had to be cut just to get it down to the already sizeable read it is.</p>
@@ -1188,10 +1348,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/04/12/finished-reading-version.html">Finished reading: Version Zero by David Yoon 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-version.html" class="u-url"><time class="dt-published" datetime="2023-04-12 10:32:53 &#43;1030">Apr 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/04/12/finished-reading-version.html" class="u-url"><time class="dt-published" datetime="2023-04-12 09:32:53 &#43;0930">Apr 12, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780593190371/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780593190371">Version Zero</a> by David Yoon 📚</p>
 <p>I thoroughly enjoyed this book. Credit to my local librarians who placed it prominently on a shelf I was casually browsing. The author does a great job of slowly building up the characters and turning up the dial in the last third of the story to the point that I really didn&rsquo;t want to stop reading it.</p>
 <p>The plot is highly relevant to modern social network / business issues and there are some not-so-subtle allusions to the current largest big tech companies.</p>
@@ -1206,10 +1366,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/12/finished-reading-eastern.html">Finished reading: Eastern Standard Tribe by Cory Doctorow 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-eastern.html" class="u-url"><time class="dt-published" datetime="2023-03-12 14:20:32 &#43;1030">Mar 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-eastern.html" class="u-url"><time class="dt-published" datetime="2023-03-12 13:20:32 &#43;0930">Mar 12, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780007327942/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780007327942">Eastern Standard Tribe</a> by Cory Doctorow 📚</p>
 <p>I found this one browsing the shelves at the library and recognised the name from my days reading <a href="https://boingboing.net/">boingboing.net</a> (and the <a href="https://www.explainxkcd.com/wiki/index.php/Category:Comics_featuring_Cory_Doctorow">numerous mentions</a> in XKCD, e.g. <a href="https://xkcd.com/239/">this one</a>). I didn&rsquo;t hate this book, but the writing style did remind me a lot of <a href="https://micro.blog/books/9780141924045?title=Snow+Crash&amp;author=Neal+Stephenson&amp;cover_id=68854">Snow Crash</a> (which I didn&rsquo;t like) with all the (unnecessary?) techy/futuristic names for things and places that were only named to highlight how techy/futuristic the world was portrayed to be. The story itself was okay but never <em>really</em> seemed to go anywhere.</p>
 <p>Not a book I&rsquo;d steer away from (I actually gave away my purchased copy of Snow Crash because I don&rsquo;t ever intend to read it again) but not something I&rsquo;ll steer people towards, either.</p>
@@ -1222,10 +1382,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/12/finished-reading-chess.html">Finished reading: 500 Chess Questions Answered by Andrew Soltis 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-chess.html" class="u-url"><time class="dt-published" datetime="2023-03-12 14:09:11 &#43;1030">Mar 12, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/12/finished-reading-chess.html" class="u-url"><time class="dt-published" datetime="2023-03-12 13:09:11 &#43;0930">Mar 12, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781849947596/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781849947596">500 Chess Questions Answered</a> by Andrew Soltis 📚</p>
 <p>Not a novel and not a textbook, but it took long enough to read that it deserves mention. This is full of valuable tips and notes, but aside from reading it cover to cover, it doesn&rsquo;t serve much use as a reference. There were a few points about calculating that I can incorporate into my games, but otherwise, it seems to be focused at beginners despite having some pretty complex examples.</p>
 <p>If you&rsquo;re new to the game, it&rsquo;s worth a read.</p>
@@ -1239,10 +1399,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/220456.html">Finished reading: The Apocalypse Seven by Gene Doucette 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/220456.html" class="u-url"><time class="dt-published" datetime="2023-03-05 22:04:56 &#43;1030">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/220456.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:04:56 &#43;0930">Mar 5, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780358418948/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780358418948">The Apocalypse Seven</a> by Gene Doucette 📚</p>
 <p>As soon as I finished <a href="https://jcarroll.xyz/2023/03/05/finished-reading-the.html">The Spaceship Next Door</a> I had a look for the author&rsquo;s other books. I got mixed up between a couple and I thought this one was the sequel. It&rsquo;s not, but I borrowed a copy anyway.</p>
 <p>This is a different story, but told with the same narrative style that again feels distinct from most other sci-fi I&rsquo;ve read. Still very enjoyable; I finished this one in just a few evenings.</p>
@@ -1257,10 +1417,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/215624.html">Finished reading: The Phoenix Project by Gene Kim 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/215624.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:56:24 &#43;1030">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/215624.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:56:24 &#43;0930">Mar 5, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781942788294/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781942788294">The Phoenix Project</a> by Gene Kim 📚</p>
 <p>I was on the fence about this one; I&rsquo;ve managed a tech team before but I&rsquo;m not currently in charge of anyone so I&rsquo;ve about had my fill of &lsquo;mangement&rsquo; information books. With that said, this is a novel that tells a story which happens to describe some best practices and approaches for running (or being in) a tech team.</p>
 <p>The part I really like is <a href="https://itrevolution.com/articles/the-three-ways-principles-underpinning-devops/">The Three Ways</a> principles and I think there&rsquo;s insight there for anyone working in a project of any kind. The story makes a lot of parallels between manufacturing physical goods and &lsquo;knowledge work&rsquo;, focussing on bottlenecks, and planning, and if you haven&rsquo;t thought about your project in that way then I&rsquo;d say definitely pick up this book. &ldquo;Go fast and break things&rdquo; runs counter to a lot of that, but eventually you&rsquo;re going to need to build something a bit more robust, and some planning will be of great benefit.</p>
@@ -1275,10 +1435,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-jellyfish.html">Finished reading: Jellyfish Age Backwards by Nicklas Brendborg 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-jellyfish.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:45:44 &#43;1030">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-jellyfish.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:45:44 &#43;0930">Mar 5, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781529387926/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781529387926">Jellyfish Age Backwards</a> by Nicklas Brendborg 📚</p>
 <p>Another recommendation from social media, if I recall. This had a lot of really interesting information about aging across species, some things we&rsquo;ve discovered that influence it, and some things that don&rsquo;t. The focus extended beyond just humans, so this was a really nice broad exploration with neat comparisons and details about unique species.</p>
 <p>Nothing too complex in there, but well worth a read.</p>
@@ -1291,10 +1451,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-the.html">Finished reading: The Spaceship Next Door by Gene Doucette 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:41:05 &#43;1030">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:41:05 &#43;0930">Mar 5, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781328567543/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781328567543">The Spaceship Next Door</a> by Gene Doucette 📚</p>
 <p>I like to mix in some fiction between more serious topics, and someone recommended this. I couldn&rsquo;t find a physical copy anywhere so I tried out my library&rsquo;s ebook offering (<a href="https://www.overdrive.com/apps/libby">Libby</a>). I&rsquo;d have preferred to use my new Kindle Scribe, but this worked okay enough on my phone.</p>
 <p>The author has a refreshing narrative style for sci-fi; something I can&rsquo;t quite put my finger on, but it was a very enjoyable read. Some twists and turns and none of it felt too forced or strayed too far from the main storyline. I&rsquo;m not quite sure it&rsquo;s the kind of story I&rsquo;d come back to again and again but I genuinely enjoyed it and have a hold on a physical copy of the sequel already (plus another from the author).</p>
@@ -1308,10 +1468,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-human.html">Finished reading: 10% Human: How Your Body’s Microbes Hold The Key To Health And Happiness by Alanna Collen 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-human.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:34:13 &#43;1030">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-human.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:34:13 &#43;0930">Mar 5, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780007584048/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780007584048">10% Human: How Your Body’s Microbes Hold The Key To Health And Happiness</a> by Alanna Collen 📚</p>
 <p>I had this one on my shelf for a while and I&rsquo;m very happy I finally got around to reading it. I knew (roughly) that we have a vast microbiome within our gut, but I hadn&rsquo;t really seen most of the details about just how impactful we now know that to be to our health. In particular, I wasn&rsquo;t aware of the connection to eating fiber; my understanding only extended as far as fiber being something indigestible that helped keep things moving right. As it turns out, there&rsquo;s a whole lot more to it, and a lot involves gut bacteria.</p>
 <p>Sure enough, I&rsquo;ve vastly increased my fiber intake (gradually) after reading this. I&rsquo;m also very curious about what we might be able to learn about the intersection of autoimmune (and other) diseases and the microbiome.</p>
@@ -1326,10 +1486,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/05/finished-reading-once.html">Finished reading: Once Upon an Algorithm by Martin Erwig 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-once.html" class="u-url"><time class="dt-published" datetime="2023-03-05 21:22:04 &#43;1030">Mar 5, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/05/finished-reading-once.html" class="u-url"><time class="dt-published" datetime="2023-03-05 20:22:04 &#43;0930">Mar 5, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780262545297/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780262545297">Once Upon an Algorithm</a> by Martin Erwig 📚</p>
 <p>I liked the premise of this book - algorithms taught with examples from classic children&rsquo;s tales. I didn&rsquo;t finish it, however - it was just too wordy (I got about halfway through). In fairness, I started with a very similar approach to <a href="https://beyondspreadsheetswithr.com/">my own book</a> which for a while had a working title of &ldquo;The R Handyman&rdquo; with allusions to power tools, tool belts, hand tools, etc&hellip; but the metaphors felt too forced after a while and we changed tack to focus on the programming without them.</p>
 <p>What I did read was well presented and went into some decent detail about software design, algorithms, and complexity. At some point, though, I think some sort of implementations were necessary to bring it all together, and this book lacked that.</p>
@@ -1343,10 +1503,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html">Finished reading: The Book of Why by Judea Pearl 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-01 18:57:26 &#43;1030">Mar 1, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/03/01/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-03-01 17:57:26 &#43;0930">Mar 1, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780241242643/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780241242643">The Book of Why</a> by Judea Pearl 📚</p>
 <p>This was the topic of a book club at work but I&rsquo;m really glad I read it. My scepticism going in was probably typical of someone not all that familiar with causal analysis, believing that we can just throw all the variables at a regression model and get an answer - anything uncorrelated will have a small coefficient and we can dispose of it. This book - while it takes a slightly arrogant/high-and-mighty approach to getting there - carefully explains that this approach works <em>only</em> if there is no dependency between the variables. This is, of course, structured into the regression model assumptions that the covariates are &ldquo;<em>independent</em> and identically distributed&rdquo; (i.i.d.) but who checks assumptions? It goes into depth about the different ways that covariates can be connected; how to route around some of them; and how to figure out which ones to include.</p>
 <p>Some of the examples seemed a bit too strawman for my liking, but I do think the general foundation is pretty solid. It&rsquo;s a bit odd to have what should really be a textbook in causal analysis as a prose-heavy combination of history and wordy examples, but then again I can&rsquo;t say I&rsquo;d have picked up the textbook and read it cover-to-cover like this.</p>
@@ -1360,10 +1520,10 @@ Error in &quot;&quot; | 2 :
 			<h1><a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html">Finished reading: The Self-Taught Computer Scientist by Cory Althoff 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-29 15:38:08 &#43;1030">Jan 29, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/29/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-29 14:38:08 &#43;0930">Jan 29, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781119724339/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781119724339">The Self-Taught Computer Scientist</a> by Cory Althoff 📚</p>
 <p>This is the book I wish I&rsquo;d read before doing <a href="https://adventofcode.com/2022">Advent of Code</a> - a full blog post on that will eventually be on my <a href="https://jcarroll.com.au">main blog</a>; I finished both parts of all 25 exercises in (strictly) base R, and am more than halfway through re-doing all of them in Rust. I was surprised at how much computer science was needed to solve these, but I did enjoy what I learned along the way, so actually reading up on some of it seemed like a good idea.</p>
 <p>This book is the follow-on from <a href="https://micro.blog/books/9781472147097">&lsquo;The Self Taught Programmer&rsquo;</a> (now on my to-read list) and does a really good job of walking through the concepts, partly framed at setting the reader up for being able to solve the typical software engineering interview questions. The code is python, which is approachable enough. There&rsquo;s some minor funkiness of seeing</p>
@@ -1383,7 +1543,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html">Finished reading: Living in Data by Jer Thorp 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:28:23 &#43;1030">Jan 26, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-26 14:28:23 &#43;0930">Jan 26, 2023</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781250849151">Living in Data</a> by Jer Thorp 📚</p>
@@ -1392,7 +1552,7 @@ else:
 <p>Reading this at the same time as <a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html">The Checklist Manifesto</a> was timely as there is a lot of overlap between the ideas in terms of gathering data.</p>
 <p>There were many great examples of &ldquo;practical visualisations&rdquo; and real-world projects involving an intersection of art and (data) science. One of the most interesting was a project involving planting genetically identical trees across a wide area, the idea being that &ldquo;how they grow&rdquo; reflects the local conditions, and as such they are a proxy for data about each area. It&rsquo;s a <a href="https://www.deeproot.com/blog/blog-entries/onetrees-the-forgotten-tree-art-project/">somewhat lost project</a> it seems, but interesting nonetheless.</p>
 <p>My very minor nitpick about this one was the very common American-ism of assuming everyone is in the Northern Hemisphere, and as such &ldquo;winter&rdquo; and &ldquo;spring&rdquo; refer to unique times of the year. It reminded me of the bias inherent in the construction of the &lsquo;north is up&rsquo; mental model of the world</p>
-<img src="https://cdn.uploads.micro.blog/64109/2023/5254ada67e.jpg" width="600" height="366" alt="">
+<!-- raw HTML omitted -->
 <p>(you do have to choose some direction, and any is as good as any other, but it&rsquo;s a choice).</p>
 <p>I loved reading this book, and I will be strongly recommending it to everyone who works with data. I am very happy that I picked up this one - sometimes browsing the shelves randomly works.</p>
 
@@ -1404,10 +1564,10 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html">Finished reading: The Checklist Manifesto by Atul Gawande 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:06:38 &#43;1030">Jan 26, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2023-01-26 14:06:38 &#43;0930">Jan 26, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781846683145/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781846683145">The Checklist Manifesto</a> by Atul Gawande 📚</p>
 <p>I honestly didn&rsquo;t know what I was getting when I placed a library hold on this book - a recommendation from somewhere, but I assumed it was about something like how to write good checklists or manage priorities. This is not that book. This is a wild ride through the ways that some checklists have been used by the author and others throughout history. Not just any checklists, mind you - it&rsquo;s a tour of how a very important checklist was designed, refined, and implemented. The side-stories are often confronting, impactful, and very entertainingly spun together. I clicked &lsquo;confirm purchase&rsquo; on my own copy of this book before I had finished reading it. I suspect I&rsquo;ll come back to this one again.</p>
 <p>Highly recommended to anyone and everyone, but especially anyone who wants to ensure that things actually get done.</p>
@@ -1420,10 +1580,10 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/26/finished-reading-our.html">Finished reading: Our Data, Ourselves by Jacqueline D. Lipton 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-our.html" class="u-url"><time class="dt-published" datetime="2023-01-26 15:00:22 &#43;1030">Jan 26, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/26/finished-reading-our.html" class="u-url"><time class="dt-published" datetime="2023-01-26 14:00:22 &#43;0930">Jan 26, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780520390508/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780520390508">Our Data, Ourselves</a> by Jacqueline D. Lipton 📚</p>
 <p>I abandoned this book after a few chapters. I wasn&rsquo;t sure how much I really wanted to read a book about technology and data where the author claims on page 10 that</p>
 <blockquote>
@@ -1448,10 +1608,10 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html">Currently reading: Living in Data by Jer Thorp 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-20 22:11:45 &#43;1030">Jan 20, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/20/currently-reading-living.html" class="u-url"><time class="dt-published" datetime="2023-01-20 21:11:45 &#43;0930">Jan 20, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781250849151/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Currently reading: <a href="https://micro.blog/books/9781250849151">Living in Data</a> by Jer Thorp 📚</p>
 <p>I picked this up browsing shelves in a (particularly <a href="https://playandgo.com.au/dymocks-book-store-rundle-mall-adelaide-review/">beautiful</a>) brick and mortar book store thanks to a voucher I received for a journal article review. So far I&rsquo;m loving it. This was my first introduction to Johanna Drucker&rsquo;s framing of <a href="http://www.digitalhumanities.org/dhq/vol/5/1/000091/000091.html">&ldquo;capta&rdquo;</a> rather than &ldquo;data&rdquo;, the former better reflecting the essence of information being &ldquo;taken and constructed&rdquo; rather than given. Lots to get through yet, but so far very entertaining and insightful.</p>
 
@@ -1463,10 +1623,10 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html">Finished reading: Loonshots by Safi Bahcall 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html" class="u-url"><time class="dt-published" datetime="2023-01-08 14:05:31 &#43;1030">Jan 8, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/08/finished-reading-loonshots.html" class="u-url"><time class="dt-published" datetime="2023-01-08 13:05:31 &#43;0930">Jan 8, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781250185976/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781250185976">Loonshots</a> by Safi Bahcall 📚</p>
 <p>This was recommended by someone at work and this time I&rsquo;m very glad they did. The author carefully details the history of some of the most significant breakthroughs and, as a physicist, isn&rsquo;t shy with the specifics. It was staggering to me at the start of the book how intertwined the &ldquo;big&rdquo; computer tech (and by extension, media; Lucasfilm, Pixar, &hellip;) companies are and the history they share. By the end of the book these connections are much clearer. I hadn&rsquo;t expected quite the history lesson, but the prevalence of persisting English technology over the much older Chinese inventions becomes well-reasoned. Less fun is the contemplation that maybe we don&rsquo;t currently have an equivalent of Bell Labs fostering such speculative exploration without the need to be profitable in the near future. Even the well-funded but negative revenue companies have the plan to be highly profitable, not a plan to make something better. The <a href="https://www.bcorporation.net/en-us/certification">B corporations</a> are a good exception, but they&rsquo;re still not quite &ldquo;loonshot nurseries&rdquo;.</p>
 <p>One of the key learnings for me, as someone who works in a Silicon-valley-adjacent biotech startup (hence the recommendation), was that the attitude of creating a &ldquo;disruptive&rdquo; technology is backwards. Many technologies can be seen as disruptive in hindsight, but they never start out with that attitude. Incremental improvement with the support to try something different certainly leads there, but it&rsquo;s perhaps too large a leap to try to get there sooner. Having the support to try something different that could be better is the first step towards making something incredible, and it certainly won&rsquo;t work every time, but not trying will absolutely lead to not making it.</p>
@@ -1481,7 +1641,7 @@ else:
 			<h1><a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html">Implicit or Explicit connection object?</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html" class="u-url"><time class="dt-published" datetime="2023-01-06 15:57:11 &#43;1030">Jan 6, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/06/implicit-or-explicit.html" class="u-url"><time class="dt-published" datetime="2023-01-06 14:57:11 &#43;0930">Jan 6, 2023</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m wrapping a (stateless, hit-every-time) REST API and my design was challenged with an alternative opinion - which is great! I get to have a more serious think about design and what might work best. I have an internal function which does the actual talking to the server, e.g. <code>.get_from_API()</code> which needs to know the URL, auth key, and query parameters. I originally designed my package to fetch these from environment variables depending on the API instance (e.g. &lsquo;prod&rsquo; vs &lsquo;dev&rsquo;) and the user (their user-specific key). Individual endpoint wrappers essentially boil down to</p>
@@ -1525,10 +1685,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2023/01/04/finished-reading-neuromancer.html">Finished reading: Neuromancer by William Gibson 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2023/01/04/finished-reading-neuromancer.html" class="u-url"><time class="dt-published" datetime="2023-01-04 18:44:09 &#43;1030">Jan 4, 2023</time></a>
+		<a href="https://jcarroll.xyz/2023/01/04/finished-reading-neuromancer.html" class="u-url"><time class="dt-published" datetime="2023-01-04 17:44:09 &#43;0930">Jan 4, 2023</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9783608504880/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9783608504880">Neuromancer</a> by William Gibson 📚</p>
 <p>I was recommended this on one of the socials and figured it was about time to get around to it. As the &lsquo;first&rsquo; &ldquo;cyber&rdquo; sci-fi book it was well-written and despite being conservative in its predictions for the future, many of these time has proven to be accurate. The pace is reasonable, but by the end it felt a bit like one short story without many offshoots - I&rsquo;m not complaining; perhaps I&rsquo;ve read too many books whose author tried to fill the pages with unnecessary side stories. Worth the read, but probably not one I&rsquo;ll come back to too often.</p>
 
@@ -1540,7 +1700,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/08/06/finished-reading-start.html">Finished reading: Start with Why: How Great Leaders Inspire Everyone to Take Action by Simon Sinek </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-08-06 16:39:29 &#43;1030">Aug 6, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-08-06 15:39:29 &#43;0930">Aug 6, 2022</time></a>
 
 		<div class="e-content">
 			 <p>Finished reading: <a href="https://micro.blog/books/9781591846444">Start with Why: How Great Leaders Inspire Everyone to Take Action</a> by Simon Sinek</p>
@@ -1548,7 +1708,7 @@ lazy_con.that()
 <p>The message that the <em>why</em> of a company should be prominent, consistent, and persistent seems fine, I just don&rsquo;t think I liked how that point was made (and taken too far).</p>
 <p>Much of the book, particularly the final chapters are great examples of <a href="https://en.wikipedia.org/wiki/Survivorship_bias">survivorship bias</a> but the author seems to either be deliberately overlooking that.</p>
 <p>I didn&rsquo;t particularly enjoy this book.</p>
-<img src="https://cdn.uploads.micro.blog/64109/2022/34065cbf3c.jpg" width="405" height="600" alt="don't make me tap the sign / survivorship bias" />
+<!-- raw HTML omitted -->
 
 		</div>
 	  </div>
@@ -1558,10 +1718,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/08/06/finished-reading-sea.html">Finished reading: Sea of Tranquility: A novel by Emily St. John Mandel </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-sea.html" class="u-url"><time class="dt-published" datetime="2022-08-06 16:16:57 &#43;1030">Aug 6, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/08/06/finished-reading-sea.html" class="u-url"><time class="dt-published" datetime="2022-08-06 15:16:57 &#43;0930">Aug 6, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780593321454/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780593321454">Sea of Tranquility: A novel</a> by Emily St. John Mandel</p>
 <p>I don&rsquo;t know if it was timely or unfortunate that I read this book so close to <a href="https://jcarroll.xyz/2022/07/09/finished-reading-the.html">The End of Eternity</a> - both had very similar themes, but Asimov is just so good at weaving the threads together into an engrossing story. I think this was a recommendation from Twitter, and while I enjoyed it, it did feel oddly paced. The start felt quite slow - the first half of the book was spent introducing the characters, yet the conclusion seemed to be squashed into the final chapter. Without spoiling too much, there&rsquo;s some <a href="https://youtu.be/u4SEDzynMiQ">bootstrap paradox</a> stuff (as any book involving time-travel should have) that just gets hand-waved away. It&rsquo;s fine if you don&rsquo;t think about it too hard.</p>
 <p>Overall, not bad. Recommended for a not-too-serious read.</p>
@@ -1574,10 +1734,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/07/31/160948.html">Finished reading: 12 Bytes: How We Got Here. Where We Might Go Next by Jeanette Winterson </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/07/31/160948.html" class="u-url"><time class="dt-published" datetime="2022-07-31 17:09:48 &#43;1030">Jul 31, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/07/31/160948.html" class="u-url"><time class="dt-published" datetime="2022-07-31 16:09:48 &#43;0930">Jul 31, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781473578258/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781473578258">12 Bytes: How We Got Here. Where We Might Go Next</a> by Jeanette Winterson</p>
 <p>My library had several copies of this on the shelf, so I assumed it was popular or new. The latter is certainly true (2021). This is a collection of short essays detailing the journey from the first analytical machine towards AGI (Artificial General Intelligence; c.f. narrow AI such as a digital assistant), specifically noting the significant contributions of women (against the prejudices and biases which are only now slowly being dismantled).</p>
 <p>The stories shouldn&rsquo;t be new to anyone, but more light on them is a good thing. The author provides a great level of detail about the contributions and their historical contexts, but borders on misandry with their side remarks. &ldquo;Turn around is fair play&rdquo; one could argue, but I don&rsquo;t think it&rsquo;s helpful here. The (extremely talented) women who programmed the ENIAC (the domain experts on the mathematical equations they were programming the machine to solve) absolutely deserved the credit for their achievements that was withheld from them, but emphasising &ldquo;the men who built it couldn&rsquo;t program it&rdquo; as if to suggest they just stuck some electronics together and couldn&rsquo;t comprehend what they&rsquo;d built without the women seems disingenuous. Arguing that the &ldquo;I&rsquo;m a Mac / I&rsquo;m a PC&rdquo; ads specifically only had men in order to reinforce the stereotype that women don&rsquo;t use computers seems like a stretch.</p>
@@ -1591,10 +1751,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/07/16/finished-reading-the.html">Finished reading: The New Childhood: Raising Kids to Thrive in a Connected World by Jordan Shapiro </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/07/16/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-16 21:15:27 &#43;1030">Jul 16, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/07/16/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-16 20:15:27 &#43;0930">Jul 16, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780316437257/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780316437257">The New Childhood: Raising Kids to Thrive in a Connected World</a> by Jordan Shapiro</p>
 <p>Another break from biology, certainly more towards psychology. This one I found randomly (promoted) at the library and given that it&rsquo;s my kids' school holidays at the moment and they&rsquo;re constantly asking for screens, I figured it was worth a shot. To my surprise, by the end of this book I&rsquo;m encouraged to give my kids <em>more</em> screen time. The big qualifier is the content - the author makes convincing arguments that collaborative games and online chat are the new <a href="https://en.wikipedia.org/wiki/Agora">agora</a>, and that kids growing into that world will need to understand, appreciate, and be able to &ldquo;read&rdquo; (&ldquo;be literate in&rdquo;) the new medium. I&rsquo;m not quite convinced that watching YouTube videos of someone playing an extremely basic free game has the same benefit as they propose comes from collaborative gaming or online forums, but I am convinced to start playing Minecraft <em>with</em> my kids.</p>
 <p>This book nicely balances historical psychology with up-to-date perspectives. I was surprised to learn that kindergarten (as a concept at all) is only a couple hundred years old. The framing of how previous generations of children have been raised within the applicable social setting (most of us are remnants of the industrial age), plus the entire home vs work distinction breaking down in the new internet-based world makes a lot of sense and encourages me to think about what outdated notions I&rsquo;m imposing on my own kids, especially how those can be limiting. In my current work I make use of mind maps and collaborative documents - why would I not want my children to use the same useful tools for their education?</p>
@@ -1610,10 +1770,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/07/09/finished-reading-the.html">Finished reading: The End of Eternity by Isaac Asimov</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/07/09/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-09 18:07:59 &#43;1030">Jul 9, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/07/09/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-07-09 17:07:59 &#43;0930">Jul 9, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780593160060/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9780593160060">The End of Eternity</a> by Isaac Asimov</p>
 <p>Easily one of the greatest science fiction writers of all time, and it&rsquo;s easy to see why. I&rsquo;ve loved many of them, but I haven&rsquo;t read anywhere near all of Asimov&rsquo;s works. I saw this one on a shelf and figured it would be a nice break from the much heavier non-fiction biology I&rsquo;ve been reading lately.</p>
 <p>The craftsmanship of Asimov&rsquo;s writing always leaves me pleased. Small callbacks throughout seem effortless; the words never seem to be shoehorned in order to tie together different threads (with other authors, certain sentences have a certain &lsquo;<a href="https://en.wikipedia.org/wiki/Chekhov%27s_gun">Chekhov&rsquo;s gun</a>&rsquo; flavour to them).</p>
@@ -1627,10 +1787,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/29/currently-reading-start.html">Currently reading: Start With Why by Simon Sinek </a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/29/currently-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-06-29 23:45:19 &#43;1030">Jun 29, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/29/currently-reading-start.html" class="u-url"><time class="dt-published" datetime="2022-06-29 22:45:19 &#43;0930">Jun 29, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780241958230/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Currently reading: <a href="https://micro.blog/books/9780241958230">Start With Why</a> by Simon Sinek</p>
 <p>I was recommended this book by someone whose opinion I hold in high regard, but so far I&rsquo;m not enjoying this book. Not necessarily for the material - I think I can appreciate the points being made about having a defined &lsquo;why&rsquo; behind a company and explanations of the various manipulations a company can leverage rather than actually being better than the competition, but rather the extreme &ldquo;American-ness&rdquo; of the author. Especially surprising since the author has a more diverse background than simply &lsquo;American&rsquo;.</p>
 <p>It took 48 pages before a single non-American company was mentioned (Ferarri), and even then it was in the context of</p>
@@ -1657,10 +1817,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/28/finished-reading-the.html">Finished reading: The Cell by Joshua Z. Rappoport 📚</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/28/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-28 15:16:18 &#43;1030">Jun 28, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/28/finished-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-28 14:16:18 &#43;0930">Jun 28, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781944648978/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Finished reading: <a href="https://micro.blog/books/9781944648978">The Cell</a> by Joshua Z. Rappoport 📚</p>
 <p>I enjoyed this book - it started with a good overview of the cellular biology but did move on to more organ-based systems, which was perfect for me. The explanations of the lab and microscopy techniques, advancements, innovations, and discoveries were particularly nice. The detour to examples of academic fraud took a dark turn for such a pleasant book. Recommended for those looking for a nice balance of in-depth science and casual explanations.</p>
 
@@ -1672,10 +1832,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/11/currently-reading-the.html">Currently reading: The Cell: Discovering the Microscopic World that Determines our Health, our Consciousness, and our Future</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/11/currently-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-11 18:06:26 &#43;1030">Jun 11, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/11/currently-reading-the.html" class="u-url"><time class="dt-published" datetime="2022-06-11 17:06:26 &#43;0930">Jun 11, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9781944648978/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>Currently reading: <a href="https://micro.blog/books/9781944648978">The Cell: Discovering the Microscopic World that Determines our Health, our Consciousness, and our Future</a> by Joshua Z. Rappoport</p>
 <p>Continuing with the technical theme, so far this is a deep dive into the very specific mechanisms of molecular biology without (yet) too much emphasis on particular cells.</p>
 <p>What surprised me so far was that <a href="https://en.wikipedia.org/wiki/Polymerase_chain_reaction">PCR</a> (as a technology) is only as old as I am. It&rsquo;s gained a lot of attention thanks to a particular virus we&rsquo;ve all heard too much about. I&rsquo;d never run one of these reactions myself (having not passed through a university biology department) and wasn&rsquo;t aware of the technical details. I had heard various claims by armchair biologists that the COVID PCR test was &ldquo;just detecting the flu&rdquo; and that &ldquo;if you run enough cycles you can find anything&rdquo; but with a better explanation of how it works - primers and temperature cycling - it&rsquo;s clear that&rsquo;s all just a load of nonsense. I&rsquo;m enjoying this one so far.</p>
@@ -1689,14 +1849,14 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/11/finished-reading-life.html">Finished reading: Life Unfolding: How the Human Body Creates Itself</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/11/finished-reading-life.html" class="u-url"><time class="dt-published" datetime="2022-06-11 17:49:17 &#43;1030">Jun 11, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/11/finished-reading-life.html" class="u-url"><time class="dt-published" datetime="2022-06-11 16:49:17 &#43;0930">Jun 11, 2022</time></a>
 
 		<div class="e-content">
 			 <p><a href="https://micro.blog/books/9780199673537">Life Unfolding: How the Human Body Creates Itself</a> by Jamie A. Davies</p>
 <p>How a single cell develops into a full human, and a lot of the molecular biology along the way. I thoroughly enjoyed this read - every chapter had highly interesting points about the particular pathways involved and how the cells end up &ldquo;choosing&rdquo; to do all the things they do; move where they need to move, align along directions, and proliferate/die. I spent a lot of time pausing my reading, looking up branches of other information and going down other rabbit holes. I read this as a library loan, but I enjoyed it so much I&rsquo;ve bought my own permanent copy.</p>
 <p>What surprised me the most (having taken a non-traditional route into biology via physics and programming) - but probably shouldn&rsquo;t have - was how the entire system efficiently re-use mechanisms and pathways for both very early development and for ongoing functionality. I recognised several genes from my cancer immunology work, but I always regarded these as &lsquo;just part of the genetic makeup of a person&rsquo;, not paying attention to how they were critical to actually creating the fully grown person, and are now being repurposed. It&rsquo;s perhaps obvious in hindsight, but there aren&rsquo;t a set of genes for pre-natal growth and another set for adult life. It makes the fact that sometimes these mechanisms fail to work perfectly all the more understandable.</p>
 <p>Highly recommend to anyone interested in the very technical details, but a well-presented resource for those generally interested.</p>
-<img src="https://cdn.uploads.micro.blog/64109/2022/d82072c1a2.jpg" width="600" height="800" alt="" />
+<!-- raw HTML omitted -->
 
 		</div>
 	  </div>
@@ -1706,10 +1866,10 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/06/11/163214.html">Finished reading: Life from an RNA World: The Ancestor Within</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/06/11/163214.html" class="u-url"><time class="dt-published" datetime="2022-06-11 17:48:07 &#43;1030">Jun 11, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/06/11/163214.html" class="u-url"><time class="dt-published" datetime="2022-06-11 16:48:07 &#43;0930">Jun 11, 2022</time></a>
 
 		<div class="e-content">
-			 <img src="https://cdn.micro.blog/books/9780674050754/cover.jpg" align="left" class="microblog_book" style="max-width: 60px; margin-right: 20px; margin-top: 0px; padding-top: 0px;">
+			 <!-- raw HTML omitted -->
 <p>(backlog from March 2022)</p>
 <p><a href="https://micro.blog/books/9780674050754">Life from an RNA World: The Ancestor Within</a> by Michael Yarus</p>
 <p>This was a nice tour of how the complex mechanisms of DNA replication came to be, and how the process works to produce proteins and phenotypes. This was the first time I really felt I understood the difference between DNA and RNA, and how such a mechanism evolved. Highly recommend to anyone interested in genomics/genetics at a technical level.</p>
@@ -1722,7 +1882,7 @@ lazy_con.that()
 			<h1><a href="https://jcarroll.xyz/2022/04/07/interpolation-animation-in.html">Interpolation animation in Julia</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/04/07/interpolation-animation-in.html" class="u-url"><time class="dt-published" datetime="2022-04-07 22:07:00 &#43;1030">Apr 7, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/04/07/interpolation-animation-in.html" class="u-url"><time class="dt-published" datetime="2022-04-07 21:07:00 &#43;0930">Apr 7, 2022</time></a>
 
 		<div class="e-content">
 			 <p>I <em>love</em> small projects for helping me learn, especially programming. I&rsquo;m still learning Julia, and have found myself wanting more &ldquo;little silly things&rdquo; I can digest and learn from. A lot of the projects I see in Julia are big mathematical models, and I&rsquo;m just not ready to dive that deep yet.</p>
@@ -1797,7 +1957,7 @@ gif(anim, fps = 24)
 			<h1><a href="https://jcarroll.xyz/2022/03/25/r-challenge-contour.html">R challenge - contour in a matrix</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/03/25/r-challenge-contour.html" class="u-url"><time class="dt-published" datetime="2022-03-25 23:02:00 &#43;1030">Mar 25, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/03/25/r-challenge-contour.html" class="u-url"><time class="dt-published" datetime="2022-03-25 22:02:00 &#43;0930">Mar 25, 2022</time></a>
 
 		<div class="e-content">
 			 <p>As part of what will hopefully become a larger post, I&rsquo;m interested in finding an R way to achieve the following: given an <code>n x n</code> matrix of zeroes with a single non-zero element of some value <code>v</code>, fill the surrounding entries such that each other element is at most one less than those surrounding it (up or down). For example, with an <code>8x8</code> matrix with a value of <code>5</code> at <code>c(5, 5)</code>, the result would be</p>
@@ -1837,7 +1997,7 @@ outer(1:n, 1:n, function(x, y) pmax(vv - abs(x - vx) - abs(y - vy), 0))
 			<h1><a href="https://jcarroll.xyz/2022/03/20/rowwise-optimizations-in.html">ByRow optimizations in Julia</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/03/20/rowwise-optimizations-in.html" class="u-url"><time class="dt-published" datetime="2022-03-20 14:11:00 &#43;1030">Mar 20, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/03/20/rowwise-optimizations-in.html" class="u-url"><time class="dt-published" datetime="2022-03-20 13:11:00 &#43;0930">Mar 20, 2022</time></a>
 
 		<div class="e-content">
 			 <p>I&rsquo;m still fairly new to Julia, even though I&rsquo;ve been trying to learn it for a few years. It&rsquo;s <em>extremely</em> powerful (fast, expressive, &hellip; whatever metric you want to use) but with that comes some complexity.</p>
@@ -1883,7 +2043,7 @@ microbenchmark::microbenchmark(
 			<h1><a href="https://jcarroll.xyz/2022/03/20/first-post-on.html">First post on jcarroll.xyz</a></h1>
 		
 
-		<a href="https://jcarroll.xyz/2022/03/20/first-post-on.html" class="u-url"><time class="dt-published" datetime="2022-03-20 12:28:39 &#43;1030">Mar 20, 2022</time></a>
+		<a href="https://jcarroll.xyz/2022/03/20/first-post-on.html" class="u-url"><time class="dt-published" datetime="2022-03-20 11:28:39 &#43;0930">Mar 20, 2022</time></a>
 
 		<div class="e-content">
 			 <p>I like blogging, but in the spirit of lowering the resistance to getting posts out, I&rsquo;ve started a micro blog <a href="https://jcarroll.xyz">jcarroll.xyz</a> where I&rsquo;ll capture shorter, less polished pieces and random thoughts / snippets.</p>
