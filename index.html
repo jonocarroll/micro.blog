@@ -24,6 +24,33 @@
 	
 	  <div class="h-entry">
 		
+			<h1><a href="https://jcarroll.xyz/2026/07/01/open-resources-for-the-win.html">Open resources for the win</a></h1>
+		
+
+		<a href="https://jcarroll.xyz/2026/07/01/open-resources-for-the-win.html" class="u-url"><time class="dt-published" datetime="2026-07-01 09:30:01 &#43;0930">Jul 1, 2026</time></a>
+
+		<div class="e-content">
+			 <p>I love community projects that accept submissions - I just finished reading <a href="https://www.gutenberg.org/ebooks/7849">&lsquo;The Trial&rsquo; by Franz Kafka courtesy of Project Gutenberg</a> and right at the end there was <a href="https://www.gutenberg.org/cache/epub/7849/pg7849-images.html#Chapter_Ten:~:text=The%20gentlemen%20nodded%2C%20one%20of%20them%20indicated%20the%20other%20with%20the%20top%20hand%20now%20in%20his%20hand.">this line</a></p>
+<blockquote>
+<p>The gentlemen nodded, one of them indicated the other with the top hand now in his hand.</p>
+</blockquote>
+<p>which didn&rsquo;t read right to me (top hand?). The men are introduced as wearing top hats; surely that&rsquo;s what is supposed to be there. Sure enough, Gutenberg also host a copy of the original <a href="https://www.gutenberg.org/cache/epub/69327/pg69327-images.html">&lsquo;Der Prozess&rsquo; in German</a> which has <a href="https://www.gutenberg.org/cache/epub/69327/pg69327-images.html#:~:text=Die%20Herren%20nickten%2C%20einer%20zeigte%20mit%20dem%20Zylinderhut%20in%20der%20Hand%20auf%20den%20andern.">the corresponding line</a></p>
+<blockquote>
+<p>Die Herren nickten, einer zeigte mit dem Zylinderhut in der Hand auf den andern.</p>
+</blockquote>
+<p>which <a href="https://translate.google.com/?sl=de&amp;tl=en&amp;text=Die%20Herren%20nickten%2C%20einer%20zeigte%20mit%20dem%20Zylinderhut%20in%20der%20Hand%20auf%20den%20andern.&amp;op=translate">translates</a> to</p>
+<blockquote>
+<p>The men nodded, one pointing at the other with his top hat in his hand.</p>
+</blockquote>
+<p>which is what I expected. Neat - I found an error, and Project Gutenberg has a <a href="https://www.gutenberg.org/help/errata.html">way to submit these</a> which I&rsquo;ve now done.</p>
+<p>That error, which looks to be an accident rather than a mistranslation, seems to be in every online copy of the book I can find, but that probably just means it&rsquo;s all based on the same translation source. It&rsquo;s not a misspelling, so wasn&rsquo;t going to get caught quickly.</p>
+<p>I&rsquo;m so grateful for free resources like this, but also that they have a way to submit corrections.</p>
+
+		</div>
+	  </div>
+	
+	  <div class="h-entry">
+		
 			<h1><a href="https://jcarroll.xyz/2026/05/21/linting-prose-around-code-with.html">Linting prose around code with vale</a></h1>
 		
 
@@ -32,14 +59,14 @@
 		<div class="e-content">
 			 <p>You may be familiar with the idea of linting for code, e.g. via <a href="https://lintr.r-lib.org/">{lintr} in R</a> which &ldquo;checks for adherence to a given style, identifying syntax errors and possible semantic issues.&rdquo; It&rsquo;s super helpful both for ensuring that your code meets your standards, but also when working in a team; no more arguing over nits in PRs about code style — it can be checked against your style guide rules automatically and enforced with tools like <a href="https://github.com/r-lib/styler">{styler}</a>. For Python the popular tool is <a href="https://docs.astral.sh/ruff/">ruff</a> which handles both the linting and formatting.</p>
 <p>What these tools don&rsquo;t do, though, is lint the prose — the text between the code blocks that explains your process. In order to do that, a tool needs to <em>ignore</em> the code and focus on the writing (because as much as Pythonistas say it &ldquo;reads like English&rdquo;, it&rsquo;s not). An open source tool, vale, handles this task and integrates smoothly with many platforms.</p>
-<p><img src="https://cdn.uploads.micro.blog/64109/2026/vale.png" alt=""></p>
+<p><img src="https://jcarroll.xyz/uploads/2026/vale.png" alt=""></p>
 <p>I first heard about <a href="https://vale.sh/">vale</a> at Everything Open 2025 (formerly known as Linux Conf). I attended a genuinely enjoyable <a href="https://github.com/alecthegeek/vale-tutorial">workshop</a> run by <a href="https://alecthegeek.tech/">Alec Clews</a> a.k.a. <a href="https://mstdn.social/@alecthegeek">alecthegeek</a> and spent a little bit of time playing around with it, but never really integrated it into my workflow.</p>
 <p>It&rsquo;s used at some big companies including <a href="https://www.datadoghq.com/blog/engineering/how-we-use-vale-to-improve-our-documentation-editing-process/">Datadog</a>.</p>
 <p>I&rsquo;m working on some blog posts this week and encountered a situation I&rsquo;d prefer to catch automatically in the future, and decided it&rsquo;s time to do this properly and integrate vale. It has LSP support, so if you&rsquo;re using VSCode it can add squiggles and hover info directly into your text. Here&rsquo;s how it looks for me:</p>
-<p><img src="https://cdn.uploads.micro.blog/64109/2026/weaselword.png" alt=""></p>
+<p><img src="https://jcarroll.xyz/uploads/2026/weaselword.png" alt=""></p>
 <p>The instructions to generate the configuration file are okay, but there&rsquo;s also an <a href="https://vale.sh/generator">interactive generator</a> with some checkboxes. You can adopt one of the common style guides (Microsoft, Google, or Red Hat) and add some extra features in packages such as <code>alex</code> which checks for inconsiderate writing.</p>
 <p>There&rsquo;s a linter for spelling (I <em>do</em> run a spell check, but now it can get caught earlier); one for doubled words (&ldquo;it was the first of of May&rdquo; catches the double &ldquo;of&rdquo;); and maybe you&rsquo;d be up the creek without the <a href="https://github.com/vale-cli/write-good/blob/master/write-good/Cliches.yml">cliché checker</a>.</p>
-<p><img src="https://cdn.uploads.micro.blog/64109/2026/cliche.png" alt=""></p>
+<p><img src="https://jcarroll.xyz/uploads/2026/cliche.png" alt=""></p>
 <p>I added a lot of checks (since they&rsquo;re not gating my workflow, just informing it) and it does highlight dozens of potential things to consider. It&rsquo;s possible to turn these off individually if they get too noisy and I don&rsquo;t need the check, e.g. with</p>
 <pre tabindex="0"><code>Google.OxfordComma = NO
 </code></pre><p>in the config.</p>
@@ -59,7 +86,7 @@ level: suggestion
 max: 40
 token: \b(\w+)\b
 </code></pre><p>so now I get a suggestion if I use more than 40 words in a sentence along with the built-in checks for &lsquo;overly wordy&rsquo; usage</p>
-<p><img src="https://cdn.uploads.micro.blog/64109/2026/wordy.png" alt=""></p>
+<p><img src="https://jcarroll.xyz/uploads/2026/wordy.png" alt=""></p>
 <h2 id="pronouns">Pronouns</h2>
 <p>The Google rules do have something for pronouns, but it looks for uses of unnecessary mixed gender &lsquo;she/he&rsquo; preferring &lsquo;they&rsquo;. I wanted one for identifying uses of just &lsquo;she&rsquo; and &lsquo;he&rsquo; (and related) in isolation to remind me to either confirm pronouns or use &lsquo;they&rsquo;. I added</p>
 <pre tabindex="0"><code># styles/local/GenderPronouns.yml
@@ -93,7 +120,6 @@ tokens:
 <p>As the people who <em>build</em> some of the tools, I do worry that we&rsquo;re avoiding solving some problems just so that we can use AI. I&rsquo;ve seen projects spinning their wheels trying to get AI to give the &lsquo;right&rsquo; answer to a problem that&rsquo;s deterministic; they know how the data needs to flow from where it is, how to transform it, and what the result should look like, but insist on repeatedly getting an agent to do the work rather than coding up the transformation.</p>
 <p>For my own work, I think every time an agent gives me some feedback about a pattern I&rsquo;m violating, I&rsquo;ll be looking to include a linting rule for it so that I just don&rsquo;t make the same mistakes over and over. This isn&rsquo;t useful for 100% of my writing — I do leverage the Grammarly extension in my browser to catch typos in emails and forms and I&rsquo;m not going to drop into a markdown document to edit <em>everything</em> I do, but tools like this are fantastic for integrating into a proper, thoughtful workflow.</p>
 <p>Do you use vale? Specifically for R users (or, I suppose, any other language + prose users) are there some good rules I should add? You can find me on <a href="https://fosstodon.org/@jonocarroll">Mastodon</a> at <a href="https://fosstodon.org/@jonocarroll">https://fosstodon.org/@jonocarroll</a> or via my main blog <a href="https://jcarroll.com.au">https://jcarroll.com.au</a>.</p>
-<p><!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
 
 		</div>
 	  </div>
